@@ -40,7 +40,7 @@ fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
 <INITIAL>   ">=" => (Tokens.GE(yypos,yypos+2));
 <INITIAL>   ">" => 	(Tokens.GT(yypos,yypos+1));
 <INITIAL>   "&" => 	(Tokens.AND(yypos,yypos+1));
-<INITIAL    "|" => 	(Tokens.OR(yypos,yypos+1));
+<INITIAL>    "|" => 	(Tokens.OR(yypos,yypos+1));
 <INITIAL>   ":=" => (Tokens.ASSIGN(yypos,yypos+2));
 
 <INITIAL>	type => (Tokens.TYPE(yypos, yypos+4));
