@@ -1,8 +1,10 @@
 Group is
 
-driver.sml
 errormsg.sml
 tokens.sig
 tokens.sml
+driver.sml
 tiger.lex
-smlnj-lib.cm
+
+$/basis.cm
+$/smlnj-lib.cm
