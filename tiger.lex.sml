@@ -107,7 +107,7 @@ type lexresult = Tokens.token
 
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
-val nestLevel = 0
+val nestLevel = ref 0
 fun err(p1,p2) = ErrorMsg.error p1
 
 fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
@@ -175,12 +175,15 @@ fun yyAction0 (strm, lastMatch : yymatch) = (yystrm := strm;
       (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue()))
 fun yyAction1 (strm, lastMatch : yymatch) = (yystrm := strm; (continue()))
 fun yyAction2 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (YYBEGIN COMMENT; nestLevel = nestLevel + 1; continue()))
+      (YYBEGIN COMMENT; 
+					nestLevel := !nestLevel + 1; 
+					continue()))
 fun yyAction3 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (nestLevel = nestLevel - 1; 
-					if nestLevel = 0 then YYBEGIN INITIAL else YYBEGIN COMMENT; continue()))
+      (nestLevel := !nestLevel - 1; 
+					if !nestLevel = 0 then YYBEGIN INITIAL else ();
+					 continue()))
 fun yyAction4 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (nestLevel = nestLevel+1; continue()))
+      (nestLevel := !nestLevel+1; continue()))
 fun yyAction5 (strm, lastMatch : yymatch) = (yystrm := strm; (continue()))
 fun yyAction6 (strm, lastMatch : yymatch) = (yystrm := strm;
       (Tokens.COMMA(yypos,yypos+1)))

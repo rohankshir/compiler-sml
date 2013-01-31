@@ -3,7 +3,7 @@ type lexresult = Tokens.token
 
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
-val nestLevel = 0
+val nestLevel = ref 0
 fun err(p1,p2) = ErrorMsg.error p1
 
 fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
@@ -15,10 +15,14 @@ fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
 <INITIAL> "\n"	=> (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
 <INITIAL> ("--"[a-z]*"\n")|(" "|"\n"|"\t")+ => (continue());
 
-<INITIAL> "/*" => (YYBEGIN COMMENT; nestLevel = nestLevel + 1; continue());
-<COMMENT> "*/" => (nestLevel = nestLevel - 1; 
-					if nestLevel = 0 then YYBEGIN INITIAL else YYBEGIN COMMENT; continue());
-<COMMENT> "/*" => (nestLevel = nestLevel+1; continue());
+<INITIAL> "/*" => (YYBEGIN COMMENT; 
+					nestLevel := !nestLevel + 1; 
+					continue());
+
+<COMMENT> "*/" => (nestLevel := !nestLevel - 1; 
+					if !nestLevel = 0 then YYBEGIN INITIAL else ();
+					 continue());
+<COMMENT> "/*" => (nestLevel := !nestLevel+1; continue());
 
 <COMMENT> . => (continue());
 
