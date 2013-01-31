@@ -4,26 +4,35 @@ type lexresult = Tokens.token
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
 val nestLevel = ref 0
+val str = ref ""
 fun err(p1,p2) = ErrorMsg.error p1
 
-fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
+fun eof() = let val pos = hd(!linePos) 
+			in 
+			Tokens.EOF(pos,pos) end
 
 %%
-%s COMMENT;
+alpha = [A-Za-z];
+digit = [0-9];
+quote = \" ;
+ws = [\ \t];
+newln = \n ;
+
+%s COMMENT STRING;
 %%
 
-<INITIAL> "\n"	=> (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
-<INITIAL> ("--"[a-z]*"\n")|(" "|"\n"|"\t")+ => (continue());
 
-<INITIAL> "/*" => (YYBEGIN COMMENT; 
-					nestLevel := !nestLevel + 1; 
-					continue());
 
-<COMMENT> "*/" => (nestLevel := !nestLevel - 1; 
-					if !nestLevel = 0 then YYBEGIN INITIAL else ();
-					 continue());
-<COMMENT> "/*" => (nestLevel := !nestLevel+1; continue());
 
+<INITIAL> {newln}	=> (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
+<INITIAL> {ws}+ => (continue());
+
+<INITIAL> {quote} => (YYBEGIN STRING; continue());
+<STRING> {quote} => (YYBEGIN INITIAL; Tokens.STRING((!str), yypos, yypos + size(!str)));
+<STRING> . => (str := !str ^ yytext; continue());
+
+<INITIAL, COMMENT> "/*" => (nestLevel := !nestLevel + 1; YYBEGIN COMMENT; continue());
+<COMMENT> "*/" => (nestLevel := !nestLevel - 1; if !nestLevel = 0 then YYBEGIN INITIAL else (); continue());
 <COMMENT> . => (continue());
 
 <INITIAL> 	","	=> 	(Tokens.COMMA(yypos,yypos+1));
@@ -68,8 +77,7 @@ fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
 <INITIAL>	if => (Tokens.IF(yypos, yypos+2));
 <INITIAL> 	array => (Tokens.ARRAY(yypos, yypos+5));
 
-<INITIAL>    [A-Za-z][A-Za-z0-9]* => (Tokens.ID(yytext,yypos, yypos + size yytext));
-<INITIAL>    [0-9]+ => (Tokens.INT(Option.getOpt(Int.fromString(yytext), 0), yypos, yypos + size yytext));
-
+<INITIAL>    {alpha}({alpha}|{digit})* => (Tokens.ID(yytext,yypos, yypos + size yytext));
+<INITIAL>    {digit}+ => (Tokens.INT(Option.getOpt(Int.fromString(yytext), 0), yypos, yypos + size yytext));
 .       => (ErrorMsg.error yypos ("illegal character " ^ yytext); continue());
 
