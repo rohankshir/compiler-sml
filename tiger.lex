@@ -11,6 +11,19 @@ fun eof() = let val pos = hd(!linePos)
 			in 
 			Tokens.EOF(pos,pos) end
 
+fun convertAscii s= 
+	let
+	val pos = hd(!linePos)
+	val ascii = valOf(Int.fromString(String.substring(s,1,size s -1)))
+	val () = if ascii > 255
+	then ErrorMsg.error pos "illegal ascii escape"
+	else ();
+	in
+	if ascii < 255
+	then Char.toString(Char.chr(ascii))
+	else ""
+	end
+
 %%
 alpha = [A-Za-z];
 digit = [0-9];
@@ -27,7 +40,14 @@ newln = \n ;
 <INITIAL> {newln}	=> (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
 <INITIAL> {ws}+ => (continue());
 
-<INITIAL> {quote} => (YYBEGIN STRING; continue());
+<INITIAL> {quote} => (str := "";YYBEGIN STRING; continue());
+<STRING> \\n => (str := !str ^ "\n"; continue());
+<STRING> \\t => (str := !str ^ "\t"; continue());
+<STRING> "\\\"" => (str := !str ^ "\""; continue());
+<STRING> \\\\ => (str := !str ^ "\\"; continue());
+<STRING> \\{digit}{3} => ( str := !str ^ (convertAscii yytext); continue());
+<STRING> \\[\n|\t|\ |\f]+\\ => (continue());
+<STRING> \\[\n|\t|\ |\f]+[^\\] => (ErrorMsg.error yypos "unclosed form feed between string";continue());
 <STRING> {quote} => (YYBEGIN INITIAL; Tokens.STRING((!str), yypos, yypos + size(!str)));
 <STRING> . => (str := !str ^ yytext; continue());
 
