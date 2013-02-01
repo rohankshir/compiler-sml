@@ -110,6 +110,7 @@ val linePos = ErrorMsg.linePos
 val nestLevel = ref 0
 val inString = ref false
 val str = ref ""
+val stringPos = ref 0
 fun newlCounter s = List.length(String.tokens (fn c => if c = #"\n" then true else false) s) -1
 fun err(p1,p2) = ErrorMsg.error p1
 
@@ -200,11 +201,11 @@ fun yyAction0 (strm, lastMatch : yymatch) = (yystrm := strm;
       (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue()))
 fun yyAction1 (strm, lastMatch : yymatch) = (yystrm := strm; (continue()))
 fun yyAction2 (strm, lastMatch : yymatch) = (yystrm := strm;
-      ( inString := true; str := ""; YYBEGIN STRING; continue()))
+      (stringPos := yypos;inString := true; str := ""; YYBEGIN STRING; continue()))
 fun yyAction3 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (inString := false; YYBEGIN INITIAL; Tokens.STRING((!str), yypos, yypos + size(!str))))
+      (inString := false; YYBEGIN INITIAL; Tokens.STRING((!str), !stringPos, yypos)))
 fun yyAction4 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (ErrorMsg.error yypos ("Cannot have newline in string literal"); continue()))
+      (lineNum := !lineNum+1; linePos := yypos :: !linePos; ErrorMsg.error yypos ("Cannot have newline in string literal"); continue()))
 fun yyAction5 (strm, lastMatch : yymatch) = (yystrm := strm;
       (str := !str ^ "\n"; continue()))
 fun yyAction6 (strm, lastMatch : yymatch) = (yystrm := strm;

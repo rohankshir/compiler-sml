@@ -6,6 +6,7 @@ val linePos = ErrorMsg.linePos
 val nestLevel = ref 0
 val inString = ref false
 val str = ref ""
+val stringPos = ref 0
 fun newlCounter s = List.length(String.tokens (fn c => if c = #"\n" then true else false) s) -1
 fun err(p1,p2) = ErrorMsg.error p1
 
@@ -45,10 +46,10 @@ newln = \n ;
 
 <INITIAL, COMMENT> {newln}	=> (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
 <INITIAL> {ws}+ => (continue());
-<INITIAL> {quote} => ( inString := true; str := ""; YYBEGIN STRING; continue());
-<STRING> {quote} => (inString := false; YYBEGIN INITIAL; Tokens.STRING((!str), yypos, yypos + size(!str)));
+<INITIAL> {quote} => (stringPos := yypos;inString := true; str := ""; YYBEGIN STRING; continue());
+<STRING> {quote} => (inString := false; YYBEGIN INITIAL; Tokens.STRING((!str), !stringPos, yypos));
 
-<STRING> {newln} => (ErrorMsg.error yypos ("Cannot have newline in string literal"); continue());
+<STRING> {newln} => (lineNum := !lineNum+1; linePos := yypos :: !linePos; ErrorMsg.error yypos ("Cannot have newline in string literal"); continue());
 <STRING> \\n => (str := !str ^ "\n"; continue());
 <STRING> \\t => (str := !str ^ "\t"; continue());
 <STRING> "\\\"" => (str := !str ^ "\""; continue());
