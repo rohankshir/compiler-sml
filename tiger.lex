@@ -4,6 +4,7 @@ type lexresult = Tokens.token
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
 val nestLevel = ref 0
+val inString = ref false
 val str = ref ""
 fun err(p1,p2) = ErrorMsg.error p1
 
@@ -12,10 +13,11 @@ fun eof() = let
 			in 
 				if (!nestLevel <> 0)
 				then ErrorMsg.error pos ("UNCLOSED COMMENT")
+				else if (!inString)
+				then ErrorMsg.error pos ("UNCLOSED STRING")
 				else ();
 				Tokens.EOF(pos,pos) 
 			end
-
 
 %%
 alpha = [A-Za-z];
@@ -30,8 +32,10 @@ newln = \n ;
 <INITIAL, COMMENT> {newln}	=> (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
 <INITIAL> {ws}+ => (continue());
 
-<INITIAL> {quote} => (str := ""; YYBEGIN STRING; continue());
-<STRING> {quote} => (YYBEGIN INITIAL; Tokens.STRING((!str), yypos, yypos + size(!str)));
+<INITIAL> {quote} => ( inString := true; str := ""; YYBEGIN STRING; continue());
+<STRING> {quote} => (inString := false; YYBEGIN INITIAL; Tokens.STRING((!str), yypos, yypos + size(!str)));
+
+<STRING> {newln} => (ErrorMsg.error yypos ("Cannot have newline in string literal"); continue());
 <STRING> . => (str := !str ^ yytext; continue());
 
 <INITIAL, COMMENT> "/*" => (nestLevel := !nestLevel + 1; YYBEGIN COMMENT; continue());
