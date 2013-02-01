@@ -7,9 +7,15 @@ val nestLevel = ref 0
 val str = ref ""
 fun err(p1,p2) = ErrorMsg.error p1
 
-fun eof() = let val pos = hd(!linePos) 
+fun eof() = let 
+				val pos = hd(!linePos) 
 			in 
-			Tokens.EOF(pos,pos) end
+				if (!nestLevel <> 0)
+				then ErrorMsg.error pos ("UNCLOSED COMMENT")
+				else ();
+				Tokens.EOF(pos,pos) 
+			end
+
 
 %%
 alpha = [A-Za-z];
@@ -21,13 +27,10 @@ newln = \n ;
 %s COMMENT STRING;
 %%
 
-
-
-
-<INITIAL> {newln}	=> (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
+<INITIAL, COMMENT> {newln}	=> (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
 <INITIAL> {ws}+ => (continue());
 
-<INITIAL> {quote} => (YYBEGIN STRING; continue());
+<INITIAL> {quote} => (str := ""; YYBEGIN STRING; continue());
 <STRING> {quote} => (YYBEGIN INITIAL; Tokens.STRING((!str), yypos, yypos + size(!str)));
 <STRING> . => (str := !str ^ yytext; continue());
 

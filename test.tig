@@ -1,10 +1,11 @@
-/* hello */
+
 let
+/*
 	type myint = int
 	type  arrtype = array of myint
 	var a = "nam"
 	var arr1:arrtype := arrtype [10] of 0
-in
+in 	
 	arr1
-end
+end 
 
