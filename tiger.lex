@@ -4,7 +4,7 @@ type lexresult = Tokens.token
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
 val nestLevel = ref 0
-val strToken = ref "blah "
+val strToken = ref ""
 fun err(p1,p2) = ErrorMsg.error p1
 
 fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
@@ -27,8 +27,8 @@ quote = \" ;
 
 <INITIAL> {quote} => (strToken := ""; YYBEGIN STRING; continue());
 
-<STRING>  {quote} => (Tokens.STRING((!strToken), yypos, yypos + size((!strToken))); YYBEGIN INITIAL; continue());
-<STRING> {alpha} => (strToken := (!strToken) ^ yytext; continue());
+<STRING>  {quote} =>  (Tokens.STRING((!strToken), yypos - size(!strToken), yypos ); YYBEGIN INITIAL; continue());
+<STRING> {alpha} => (strToken := (!strToken) ^ yytext;continue());
 
 
 <COMMENT> "*/" => (nestLevel := !nestLevel - 1; 

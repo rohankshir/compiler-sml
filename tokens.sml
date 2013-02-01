@@ -44,8 +44,14 @@ fun LPAREN(i,j) = "LPAREN   " ^ Int.toString(i)
 fun SEMICOLON(i,j) = "SEMICOLON   " ^ Int.toString(i)
 fun COLON(i,j) = "COLON   " ^ Int.toString(i)
 fun COMMA(i,j) = "COMMA   " ^ Int.toString(i)
-fun STRING(s,i,j) =  "STRING("^s^")     " ^ Int.toString(i)
-
+fun STRING(s,i,j) = 
+	let
+		val () = print ( s  ^ "\n") 
+		val () = print("Position: " ^ Int.toString(i) ^ "\n");
+		val () = print("New Position: " ^ Int.toString(j) ^ "\n")
+	in
+		"STRING("^s^")     " ^ Int.toString(i)
+	end
 fun INT(c,i,j) = "INT("^Int.toString(c)^")   " ^ Int.toString(i)
 fun ID(s,i,j) = "ID("^s^")     " ^ Int.toString(i)
 fun EOF(i,j) = "EOF   " ^ Int.toString(i)

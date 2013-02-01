@@ -108,7 +108,7 @@ type lexresult = Tokens.token
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
 val nestLevel = ref 0
-val strToken = ref "blah "
+val strToken = ref ""
 fun err(p1,p2) = ErrorMsg.error p1
 
 fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
@@ -182,11 +182,11 @@ fun yyAction2 (strm, lastMatch : yymatch) = (yystrm := strm;
 fun yyAction3 (strm, lastMatch : yymatch) = (yystrm := strm;
       (strToken := ""; YYBEGIN STRING; continue()))
 fun yyAction4 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (Tokens.STRING((!strToken), yypos, yypos + size((!strToken))); YYBEGIN INITIAL; continue()))
+      (Tokens.STRING((!strToken), yypos - size(!strToken), yypos ); YYBEGIN INITIAL; continue()))
 fun yyAction5 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (strToken := (!strToken) ^ yytext; continue())
+        yystrm := strm; (strToken := (!strToken) ^ yytext;continue())
       end
 fun yyAction6 (strm, lastMatch : yymatch) = (yystrm := strm;
       (nestLevel := !nestLevel - 1; 
