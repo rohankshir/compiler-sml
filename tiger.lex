@@ -6,6 +6,7 @@ val linePos = ErrorMsg.linePos
 val nestLevel = ref 0
 val inString = ref false
 val str = ref ""
+fun newlCounter s = List.length(String.tokens (fn c => if c = #"\n" then true else false) s) -1
 fun err(p1,p2) = ErrorMsg.error p1
 
 fun eof() = let 
@@ -53,7 +54,7 @@ newln = \n ;
 <STRING> "\\\"" => (str := !str ^ "\""; continue());
 <STRING> \\\\ => (str := !str ^ "\\"; continue());
 <STRING> \\{digit}{3} => ( str := !str ^ (convertAscii yytext); continue());
-<STRING> \\[\n|\t|\ |\f]+\\ => (continue());
+<STRING> \\[\n|\t|\ |\f]+\\ => (lineNum := !lineNum + newlCounter yytext;continue());
 <STRING> \\[\n|\t|\ |\f]+[^\\] => (ErrorMsg.error yypos "unclosed form feed between string";continue());
 <STRING> . => (str := !str ^ yytext; continue());
 

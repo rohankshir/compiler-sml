@@ -110,6 +110,7 @@ val linePos = ErrorMsg.linePos
 val nestLevel = ref 0
 val inString = ref false
 val str = ref ""
+fun newlCounter s = List.length(String.tokens (fn c => if c = #"\n" then true else false) s) -1
 fun err(p1,p2) = ErrorMsg.error p1
 
 fun eof() = let 
@@ -217,7 +218,11 @@ fun yyAction9 (strm, lastMatch : yymatch) = let
       in
         yystrm := strm; ( str := !str ^ (convertAscii yytext); continue())
       end
-fun yyAction10 (strm, lastMatch : yymatch) = (yystrm := strm; (continue()))
+fun yyAction10 (strm, lastMatch : yymatch) = let
+      val yytext = yymktext(strm)
+      in
+        yystrm := strm; (lineNum := !lineNum + newlCounter yytext;continue())
+      end
 fun yyAction11 (strm, lastMatch : yymatch) = (yystrm := strm;
       (ErrorMsg.error yypos "unclosed form feed between string";continue()))
 fun yyAction12 (strm, lastMatch : yymatch) = let
