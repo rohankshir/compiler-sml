@@ -1,10 +1,9 @@
 Group is
 
+$/basis.cm
+$/smlnj-lib.cm
 tiger.lex
 errormsg.sml
 parsetest.sml
 tiger.grm
-ml-yacc-lib.cm
-
-$/basis.cm
-$/smlnj-lib.cm
+$/ml-yacc-lib.cm
