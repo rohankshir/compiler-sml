@@ -1,3 +1,5 @@
+structure A = Absyn
+
 %%
 %term
     EOF 
@@ -12,7 +14,35 @@
   | BREAK | NIL
   | FUNCTION | VAR | TYPE 
 
-%nonterm  exp | program | decs | dec | tydec | vardec | fundec | ty | tyfields | tyfield | lvalue | explistsemi | explistcomma | intexp | typelist| literal| sequence | functionstm | operation |arraystm | ifthenelse | ifthen | whilestm | forstm | letstm  | op | negexp | assignment | record | lvaluetail
+%nonterm  exp of A.exp
+  | program of A.exp 
+  | decs  of A.dec
+  | dec of A.dec
+  | tydec of {name: Symbol.symbol, ty: A.ty, pos: pos}
+  | vardec of A.dec
+  | fundec of A.fundec
+  | ty of A.ty
+  | tyfields of A.field list
+  | tyfield of A.field
+  | lvalue of A.var
+  | explistsemi of (A.exp * pos) list
+  | explistcomma of (A.exp * pos) list
+  | typelist of (symbol * A.exp * pos) list
+  | literal of A.exp
+  | sequence of (A.exp * pos) list
+  | functionstm of A.exp
+  | operation of A.exp
+  | arraystm of A.exp
+  | ifthenelse of A.exp
+  | ifthen of A.exp
+  | whilestm of A.exp
+  | forstm of A.exp
+  | letstm  of A.exp
+  | negexp of A.exp
+  | assignment of A.exp
+  | record of A.exp
+  | lvaluetail of lvalueVar list
+
 
 
 %pos int
@@ -55,24 +85,24 @@
  *  to replace the two dummy productions below with an actual grammar. 
  *)
 
-program	: exp			()
+program	: exp			(exp)
 
 	
-exp: literal ()
-  | negexp ()
-  | record ()
-  | sequence ()
-  | functionstm ()
-  | assignment ()
-  | operation ()
-  | arraystm ()
-  | ifthenelse ()
-  | ifthen ()
-  | whilestm ()
-  | forstm ()
-  | letstm ()
-  | BREAK ()
-  | NIL ()
+exp: literal (literal)
+  | negexp (negexp)
+  | record (record)
+  | sequence (sequence)
+  | functionstm (functionstm)
+  | assignment (assignment)
+  | operation (operation)
+  | arraystm (arraystm)
+  | ifthenelse (ifthenelse)
+  | ifthen (ifthen)
+  | whilestm (whilestm)
+  | forstm (forstm)
+  | letstm (letstm)
+  | BREAK (A.BreakExp(BREAKleft))
+  | NIL         ()
   | LPAREN RPAREN     ()
   | lvalue  ()
 
@@ -104,6 +134,7 @@ operation: exp PLUS exp()
   |  exp LE   exp    ()
   |  exp GT   exp    ()
   |  exp LT   exp    ()
+
 
 
 arraystm: ID LBRACK exp RBRACK OF exp ()
