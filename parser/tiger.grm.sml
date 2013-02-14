@@ -18,8 +18,7 @@ fun createVar (current,result) =
               case current of 
               fieldElement (s,p) => A.FieldVar(result,s,p)
             | subscriptElement (e,p) => A.SubscriptVar(result,e,p)
-
-
+             (****ADD NULL CASE*****) 
 
 
 end
@@ -862,7 +861,7 @@ end
 |  ( 17, ( ( _, ( MlyValue.lvalue lvalue1, lvalue1left, lvalue1right))
  :: rest671)) => let val  result = MlyValue.exp (fn _ => let val  (
 lvalue as lvalue1) = lvalue1 ()
- in (lvalue)
+ in (A.VarExp(lvalue))
 end)
  in ( LrTable.NT 0, ( result, lvalue1left, lvalue1right), rest671)
 end

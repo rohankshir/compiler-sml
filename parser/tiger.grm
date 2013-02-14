@@ -8,8 +8,7 @@ fun createVar (current,result) =
               case current of 
               fieldElement (s,p) => A.FieldVar(result,s,p)
             | subscriptElement (e,p) => A.SubscriptVar(result,e,p)
-
-
+             (****ADD NULL CASE*****) 
 
 %%
 %term
@@ -52,7 +51,7 @@ fun createVar (current,result) =
   | negexp of A.exp
   | assignment of A.exp
   | record of A.exp
-  | lvaluetail of varElement list  (* ask hilton*)
+  | lvaluetail of varElement list 
 
 
 
@@ -113,7 +112,7 @@ exp: literal (literal)
   | BREAK (A.BreakExp(BREAKleft))
   | NIL         (A.NilExp)
   | LPAREN RPAREN     (nil)
-  | lvalue  (lvalue)
+  | lvalue  (A.VarExp(lvalue))
 
 
 literal: STRING (A.StringExp(STRING, STRINGleft))
