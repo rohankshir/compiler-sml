@@ -11,6 +11,16 @@ struct
 structure A = Absyn
 open Symbol
 
+datatype varElement = fieldElement of Symbol.symbol * A.pos
+                  |   subscriptElement of A.exp * A.pos
+
+fun createVar (current,result) = 
+              case current of 
+              fieldElement (s,p) => A.FieldVar(result,s,p)
+            | subscriptElement (e,p) => A.SubscriptVar(result,e,p)
+
+
+
 
 end
 structure LrTable = Token.LrTable
@@ -616,7 +626,7 @@ structure MlyValue =
 struct
 datatype svalue = VOID | ntVOID of unit ->  unit
  | STRING of unit ->  (string) | INT of unit ->  (int)
- | ID of unit ->  (string) | lvaluetail of unit ->  (symbol list)
+ | ID of unit ->  (string) | lvaluetail of unit ->  (varElement list)
  | record of unit ->  (A.exp) | assignment of unit ->  (A.exp)
  | negexp of unit ->  (A.exp) | letstm of unit ->  (A.exp)
  | forstm of unit ->  (A.exp) | whilestm of unit ->  (A.exp)
@@ -1297,33 +1307,33 @@ end)
 end
 |  ( 69, ( ( _, ( MlyValue.lvaluetail lvaluetail1, _, lvaluetail1right
 )) :: ( _, ( MlyValue.ID ID1, ID1left, _)) :: rest671)) => let val  
-result = MlyValue.lvalue (fn _ => let val  ID1 = ID1 ()
- val  lvaluetail1 = lvaluetail1 ()
- in ()
+result = MlyValue.lvalue (fn _ => let val  (ID as ID1) = ID1 ()
+ val  (lvaluetail as lvaluetail1) = lvaluetail1 ()
+ in (foldl createVar (A.SimpleVar(symbol ID,ID1left)) lvaluetail)
 end)
  in ( LrTable.NT 10, ( result, ID1left, lvaluetail1right), rest671)
 
 end
 |  ( 70, ( rest671)) => let val  result = MlyValue.lvaluetail (fn _ =>
- ())
+ ([]))
  in ( LrTable.NT 27, ( result, defaultPos, defaultPos), rest671)
 end
 |  ( 71, ( ( _, ( MlyValue.lvaluetail lvaluetail1, _, lvaluetail1right
-)) :: ( _, ( MlyValue.ID ID1, _, _)) :: ( _, ( _, DOT1left, _)) :: 
-rest671)) => let val  result = MlyValue.lvaluetail (fn _ => let val  
-ID1 = ID1 ()
- val  lvaluetail1 = lvaluetail1 ()
- in ()
+)) :: ( _, ( MlyValue.ID ID1, ID1left, _)) :: ( _, ( _, DOT1left, _))
+ :: rest671)) => let val  result = MlyValue.lvaluetail (fn _ => let
+ val  (ID as ID1) = ID1 ()
+ val  (lvaluetail as lvaluetail1) = lvaluetail1 ()
+ in (fieldElement(symbol ID, ID1left)::lvaluetail)
 end)
  in ( LrTable.NT 27, ( result, DOT1left, lvaluetail1right), rest671)
 
 end
 |  ( 72, ( ( _, ( MlyValue.lvaluetail lvaluetail1, _, lvaluetail1right
-)) :: _ :: ( _, ( MlyValue.exp exp1, _, _)) :: ( _, ( _, LBRACK1left,
- _)) :: rest671)) => let val  result = MlyValue.lvaluetail (fn _ =>
- let val  exp1 = exp1 ()
- val  lvaluetail1 = lvaluetail1 ()
- in ()
+)) :: _ :: ( _, ( MlyValue.exp exp1, exp1left, _)) :: ( _, ( _, 
+LBRACK1left, _)) :: rest671)) => let val  result = MlyValue.lvaluetail
+ (fn _ => let val  (exp as exp1) = exp1 ()
+ val  (lvaluetail as lvaluetail1) = lvaluetail1 ()
+ in (subscriptElement(exp,exp1left)::lvaluetail)
 end)
  in ( LrTable.NT 27, ( result, LBRACK1left, lvaluetail1right), rest671
 )

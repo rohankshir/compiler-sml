@@ -1,6 +1,16 @@
 structure A = Absyn
 open Symbol
 
+datatype varElement = fieldElement of Symbol.symbol * A.pos
+                  |   subscriptElement of A.exp * A.pos
+
+fun createVar (current,result) = 
+              case current of 
+              fieldElement (s,p) => A.FieldVar(result,s,p)
+            | subscriptElement (e,p) => A.SubscriptVar(result,e,p)
+
+
+
 %%
 %term
     EOF 
@@ -42,7 +52,7 @@ open Symbol
   | negexp of A.exp
   | assignment of A.exp
   | record of A.exp
-  | lvaluetail of symbol list  (* ask hilton*)
+  | lvaluetail of varElement list  (* ask hilton*)
 
 
 
@@ -192,10 +202,10 @@ vardec: VAR ID ASSIGN exp   (A.VarDec{name=symbol ID,escape=ref true, typ=NONE, 
 fundec: FUNCTION ID LPAREN tyfields RPAREN EQ exp       ({name=symbol ID,params=tyfields,result=NONE,body=exp,pos=FUNCTION1left} : A.fundec)
       | FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp ({name=symbol ID1,params=tyfields,result=SOME (symbol ID2,ID2left),body=exp,pos=FUNCTION1left} : A.fundec)
 
-lvalue: ID lvaluetail   ()   (* how? *)
-lvaluetail: ()
-          | DOT ID lvaluetail ()
-          |LBRACK exp RBRACK lvaluetail ()
+lvalue: ID lvaluetail   (foldl createVar (A.SimpleVar(symbol ID,ID1left)) lvaluetail)
+lvaluetail:                   ([])
+          | DOT ID lvaluetail (fieldElement(symbol ID, ID1left)::lvaluetail)
+          |LBRACK exp RBRACK lvaluetail (subscriptElement(exp,exp1left)::lvaluetail)
 
 
 
