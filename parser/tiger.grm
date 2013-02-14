@@ -56,9 +56,11 @@ fun createVar (current,result) =
 
 %pos int
 
-%nonassoc FUNCTION DO OF LET IN
-%nonassoc THEN
-%nonassoc ELSE 
+%nonassoc DO 
+%nonassoc OF LET 
+%nonassoc THEN 
+%right ELSE 
+%right ASSIGN
 %nonassoc OR
 %nonassoc AND
 %nonassoc EQ NEQ GT LT GE LE
@@ -108,7 +110,7 @@ exp: literal (literal)
   | letstm (letstm)
   | BREAK (A.BreakExp(BREAKleft))
   | NIL         (A.NilExp)
-  | LPAREN RPAREN     (A.NilExp) (* ASK HILTON ******)
+  | LPAREN RPAREN     (A.SeqExp([]))
   | lvalue  (A.VarExp(lvalue))
 
 

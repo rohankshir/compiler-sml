@@ -1,17 +1,3 @@
-12 shift/reduce conflicts
-
-error:  state 60: shift/reduce conflict (shift OR, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift AND, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift GE, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift GT, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift LE, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift LT, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift NEQ, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift EQ, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift DIVIDE, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift TIMES, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift MINUS, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift PLUS, reduce by rule 26)
 
 state 0:
 
@@ -1238,18 +1224,6 @@ state 59:
 
 	.	error
 
-error:  state 60: shift/reduce conflict (shift OR, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift AND, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift GE, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift GT, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift LE, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift LT, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift NEQ, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift EQ, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift DIVIDE, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift TIMES, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift MINUS, reduce by rule 26)
-error:  state 60: shift/reduce conflict (shift PLUS, reduce by rule 26)
 
 state 60:
 
