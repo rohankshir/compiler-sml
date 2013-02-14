@@ -8,7 +8,6 @@ fun createVar (current,result) =
               case current of 
               fieldElement (s,p) => A.FieldVar(result,s,p)
             | subscriptElement (e,p) => A.SubscriptVar(result,e,p)
-             (****ADD NULL CASE*****) 
 
 %%
 %term
@@ -30,7 +29,7 @@ fun createVar (current,result) =
   | dec of A.dec
   | tydec of A.dec
   | vardec of A.dec
-  | fundec of A.dec
+  | fundec of A.fundec
   | ty of A.ty
   | tyfields of A.field list
   | tyfield of A.field
@@ -57,11 +56,9 @@ fun createVar (current,result) =
 
 %pos int
 
-%nonassoc WHILE DO OF
-%nonassoc IF THEN ELSE
-%nonassoc LET IN
-%nonassoc FUNCTION
-%nonassoc ASSIGN
+%nonassoc FUNCTION DO OF LET IN
+%nonassoc THEN
+%nonassoc ELSE 
 %nonassoc OR
 %nonassoc AND
 %nonassoc EQ NEQ GT LT GE LE
@@ -111,7 +108,7 @@ exp: literal (literal)
   | letstm (letstm)
   | BREAK (A.BreakExp(BREAKleft))
   | NIL         (A.NilExp)
-  | LPAREN RPAREN     (nil)
+  | LPAREN RPAREN     (A.NilExp) (* ASK HILTON ******)
   | lvalue  (A.VarExp(lvalue))
 
 
@@ -180,10 +177,10 @@ decs: dec ([dec])
 
 dec: tydec (tydec)
    | vardec (vardec)
-   | fundec (fundec)
+   | fundec (A.FunctionDec([fundec]))
 
-    
-tydec: TYPE ID EQ ty  (A.TypeDec{name= symbol ID, ty= ty, pos= TYPE1left})
+(* ASK HILTON *)    
+tydec: TYPE ID EQ ty  (A.TypeDec([{name= symbol ID, ty= ty, pos= TYPE1left}]))
 
 ty: ID    (A.NameTy(symbol ID,ID1left))
   | LBRACE tyfields RBRACE (A.RecordTy(tyfields))
@@ -198,8 +195,9 @@ tyfield: ID COLON ID ({name=symbol ID1,escape=ref true,typ=symbol ID2,pos=ID1lef
 vardec: VAR ID ASSIGN exp   (A.VarDec{name=symbol ID,escape=ref true, typ=NONE, init=exp,pos=VAR1left})
       | VAR ID COLON ID ASSIGN exp      (A.VarDec{name=symbol ID1,escape=ref true, typ=SOME (symbol ID1,ID1left), init=exp,pos=VARleft})
 
-fundec: FUNCTION ID LPAREN tyfields RPAREN EQ exp       ({name=symbol ID,params=tyfields,result=NONE,body=exp,pos=FUNCTION1left} : A.fundec)
-      | FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp ({name=symbol ID1,params=tyfields,result=SOME (symbol ID2,ID2left),body=exp,pos=FUNCTION1left} : A.fundec)
+fundec: FUNCTION ID LPAREN tyfields RPAREN EQ exp             ({name=symbol ID,params=tyfields,result=NONE,body=exp,pos=FUNCTION1left} : A.fundec)
+
+      | FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp    ({name=symbol ID1,params=tyfields,result=SOME (symbol ID2,ID2left),body=exp,pos=FUNCTION1left} : A.fundec)
 
 lvalue: ID lvaluetail   (foldl createVar (A.SimpleVar(symbol ID,ID1left)) lvaluetail)
 lvaluetail:                   ([])

@@ -1,3 +1,17 @@
+12 shift/reduce conflicts
+
+error:  state 60: shift/reduce conflict (shift OR, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift AND, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift GE, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift GT, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift LE, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift LT, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift NEQ, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift EQ, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift DIVIDE, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift TIMES, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift MINUS, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift PLUS, reduce by rule 26)
 
 state 0:
 
@@ -1224,6 +1238,18 @@ state 59:
 
 	.	error
 
+error:  state 60: shift/reduce conflict (shift OR, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift AND, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift GE, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift GT, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift LE, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift LT, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift NEQ, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift EQ, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift DIVIDE, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift TIMES, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift MINUS, reduce by rule 26)
+error:  state 60: shift/reduce conflict (shift PLUS, reduce by rule 26)
 
 state 60:
 
@@ -2230,12 +2256,6 @@ state 99:
 	ifthenelse : IF exp THEN exp . ELSE exp 
 	ifthen : IF exp THEN exp .  (reduce by rule 41)
 
-	EOF	reduce by rule 41
-	COMMA	reduce by rule 41
-	SEMICOLON	reduce by rule 41
-	RPAREN	reduce by rule 41
-	RBRACK	reduce by rule 41
-	RBRACE	reduce by rule 41
 	PLUS	shift 39
 	MINUS	shift 38
 	TIMES	shift 37
@@ -2248,17 +2268,10 @@ state 99:
 	GE	shift 30
 	AND	shift 29
 	OR	shift 28
-	THEN	reduce by rule 41
-	TO	reduce by rule 41
-	DO	reduce by rule 41
-	IN	reduce by rule 41
-	END	reduce by rule 41
-	FUNCTION	reduce by rule 41
-	VAR	reduce by rule 41
-	TYPE	reduce by rule 41
+	ELSE	shift 120
 
 
-	.	error
+	.	reduce by rule 41
 
 
 state 100:
@@ -3369,5 +3382,5 @@ state 152:
 
 	.	error
 
-585 of 1104 action table entries left after compaction
+572 of 1091 action table entries left after compaction
 579 goto table entries
