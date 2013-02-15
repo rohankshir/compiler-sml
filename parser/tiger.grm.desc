@@ -2002,10 +2002,10 @@ state 87:
 
 state 88:
 
-	explistcomma : explistcomma . SEMICOLON exp 
+	explistcomma : explistcomma . COMMA exp 
 	functionstm : ID LPAREN explistcomma . RPAREN 
 
-	SEMICOLON	shift 108
+	COMMA	shift 108
 	RPAREN	shift 107
 
 
@@ -2404,7 +2404,7 @@ state 107:
 
 state 108:
 
-	explistcomma : explistcomma SEMICOLON . exp 
+	explistcomma : explistcomma COMMA . exp 
 
 	ID	shift 26
 	INT	shift 25
@@ -2754,7 +2754,7 @@ state 125:
 
 state 126:
 
-	explistcomma : explistcomma SEMICOLON exp .  (reduce by rule 51)
+	explistcomma : explistcomma COMMA exp .  (reduce by rule 51)
 	operation : exp . PLUS exp 
 	operation : exp . MINUS exp 
 	operation : exp . TIMES exp 

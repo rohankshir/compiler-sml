@@ -4,6 +4,20 @@ open Symbol
 datatype varElement = fieldElement of Symbol.symbol * A.pos
                   |   subscriptElement of A.exp * A.pos
 
+fun stitchDecListHelper (a, []) = [a]
+| stitchDecListHelper (A.FunctionDec [a], head::l) = 
+              (case head of 
+              A.FunctionDec [x] =>  (A.FunctionDec([x]@[a]))::l
+              | _ => (A.FunctionDec([a]))::head::l
+              )
+| stitchDecListHelper  (A.TypeDec [a], head::l) = 
+  (case head of 
+              A.TypeDec [x] =>  (A.TypeDec([x]@[a]))::l
+              | _ => (A.TypeDec([a]))::head::l
+              )
+  | stitchDecListHelper  (A.VarDec a, l) = (A.VarDec(a))::l
+
+fun stitchDecList l = foldr stitchDecListHelper [] l
 fun createVar (current,result) = 
               case current of 
               fieldElement (s,p) => A.FieldVar(result,s,p)
@@ -57,7 +71,7 @@ fun createVar (current,result) =
 %pos int
 
 %nonassoc DO 
-%nonassoc OF LET 
+%nonassoc OF
 %nonassoc THEN 
 %right ELSE 
 %right ASSIGN
@@ -158,8 +172,8 @@ whilestm: WHILE exp DO exp (A.WhileExp{test=exp1, body= exp2, pos= WHILE1left})
 
 forstm: FOR ID ASSIGN exp TO exp DO exp (A.ForExp{var= symbol ID,escape= ref true,lo= exp1,hi= exp2,body= exp3,pos= FOR1left})
 
-letstm  : LET decs IN explistsemi END (A.LetExp{decs= decs, body=A.SeqExp(explistsemi), pos=LET1left})
-  | LET decs IN END         (A.LetExp{decs= decs, body=A.SeqExp[], pos=LET1left})
+letstm  : LET decs IN explistsemi END (A.LetExp{decs= stitchDecList decs, body=A.SeqExp(explistsemi), pos=LET1left})
+  | LET decs IN END         (A.LetExp{decs= stitchDecList decs, body=A.SeqExp[], pos=LET1left})
 
 
        
@@ -172,7 +186,7 @@ explistsemi: exp  ([(exp,expleft)])
       | explistsemi SEMICOLON exp  (explistsemi @ [(exp,expleft)])
 
 explistcomma: exp  ([exp])
-      | explistcomma SEMICOLON exp  (explistcomma @ [exp])
+      | explistcomma COMMA exp  (explistcomma @ [exp])
 
 decs: dec ([dec])
     | decs dec (decs @ [dec])
@@ -195,7 +209,7 @@ tyfields: (* empty *) (nil)
 tyfield: ID COLON ID ({name=symbol ID1,escape=ref true,typ=symbol ID2,pos=ID1left}) 
 
 vardec: VAR ID ASSIGN exp   (A.VarDec{name=symbol ID,escape=ref true, typ=NONE, init=exp,pos=VAR1left})
-      | VAR ID COLON ID ASSIGN exp      (A.VarDec{name=symbol ID1,escape=ref true, typ=SOME (symbol ID1,ID1left), init=exp,pos=VARleft})
+      | VAR ID COLON ID ASSIGN exp      (A.VarDec{name=symbol ID1,escape=ref true, typ=SOME (symbol ID2,ID2left), init=exp,pos=VARleft})
 
 fundec: FUNCTION ID LPAREN tyfields RPAREN EQ exp             ({name=symbol ID,params=tyfields,result=NONE,body=exp,pos=FUNCTION1left} : A.fundec)
 

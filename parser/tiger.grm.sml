@@ -14,6 +14,20 @@ open Symbol
 datatype varElement = fieldElement of Symbol.symbol * A.pos
                   |   subscriptElement of A.exp * A.pos
 
+fun stitchDecListHelper (a, []) = [a]
+| stitchDecListHelper (A.FunctionDec [a], head::l) = 
+              (case head of 
+              A.FunctionDec [x] =>  (A.FunctionDec([x]@[a]))::l
+              | _ => (A.FunctionDec([a]))::head::l
+              )
+| stitchDecListHelper  (A.TypeDec [a], head::l) = 
+  (case head of 
+              A.TypeDec [x] =>  (A.TypeDec([x]@[a]))::l
+              | _ => (A.TypeDec([a]))::head::l
+              )
+  | stitchDecListHelper  (A.VarDec a, l) = (A.VarDec(a))::l
+
+fun stitchDecList l = foldr stitchDecListHelper [] l
 fun createVar (current,result) = 
               case current of 
               fieldElement (s,p) => A.FieldVar(result,s,p)
@@ -103,6 +117,7 @@ val table=let val actionRows =
 \\001\000\002\000\146\000\000\000\
 \\001\000\002\000\150\000\000\000\
 \\001\000\005\000\106\000\013\000\105\000\000\000\
+\\001\000\005\000\110\000\009\000\109\000\000\000\
 \\001\000\005\000\133\000\009\000\132\000\000\000\
 \\001\000\005\000\133\000\013\000\141\000\000\000\
 \\001\000\006\000\097\000\028\000\096\000\000\000\
@@ -110,7 +125,6 @@ val table=let val actionRows =
 \\001\000\006\000\144\000\020\000\143\000\000\000\
 \\001\000\007\000\084\000\009\000\083\000\000\000\
 \\001\000\007\000\084\000\039\000\111\000\000\000\
-\\001\000\007\000\110\000\009\000\109\000\000\000\
 \\001\000\008\000\098\000\000\000\
 \\001\000\011\000\108\000\015\000\041\000\016\000\040\000\018\000\039\000\
 \\019\000\038\000\020\000\037\000\021\000\036\000\022\000\035\000\
@@ -262,26 +276,26 @@ val actionRowNumbers =
 \\099\000\098\000\097\000\095\000\
 \\048\000\014\000\015\000\016\000\
 \\046\000\040\000\038\000\073\000\
-\\032\000\091\000\067\000\112\000\
+\\033\000\091\000\067\000\112\000\
 \\017\000\018\000\012\000\010\000\
 \\077\000\002\000\001\000\005\000\
 \\007\000\006\000\008\000\004\000\
 \\003\000\081\000\080\000\079\000\
 \\078\000\096\000\011\000\042\000\
-\\029\000\035\000\012\000\012\000\
+\\030\000\035\000\012\000\012\000\
 \\012\000\074\000\012\000\114\000\
 \\026\000\071\000\043\000\036\000\
-\\034\000\093\000\075\000\033\000\
+\\027\000\093\000\075\000\034\000\
 \\088\000\019\000\012\000\020\000\
 \\104\000\039\000\085\000\084\000\
 \\092\000\116\000\012\000\072\000\
 \\022\000\012\000\115\000\076\000\
 \\012\000\087\000\100\000\049\000\
 \\104\000\101\000\108\000\047\000\
-\\105\000\027\000\030\000\012\000\
+\\105\000\028\000\031\000\012\000\
 \\012\000\037\000\044\000\089\000\
 \\117\000\012\000\094\000\023\000\
-\\028\000\012\000\031\000\021\000\
+\\029\000\012\000\032\000\021\000\
 \\024\000\041\000\083\000\114\000\
 \\012\000\082\000\103\000\102\000\
 \\109\000\012\000\025\000\106\000\
@@ -598,7 +612,7 @@ local
        fun f i =
             if i=numstates then g i
             else (Array.update(memo,i,SHIFT (STATE i)); f (i+1))
-          in f 0 handle General.Subscript => ()
+          in f 0 handle Subscript => ()
           end
 in
 val entry_to_action = fn 0 => ACCEPT | 1 => ERROR | j => Array.sub(memo,(j-2))
@@ -608,7 +622,7 @@ val actionRows=string_to_table(string_to_pairlist_default(T,entry_to_action),act
 val actionRowNumbers = string_to_list actionRowNumbers
 val actionT = let val actionRowLookUp=
 let val a=Array.fromList(actionRows) in fn i=>Array.sub(a,i) end
-in Array.fromList(List.map actionRowLookUp actionRowNumbers)
+in Array.fromList(map actionRowLookUp actionRowNumbers)
 end
 in LrTable.mkLrTable {actions=actionT,gotos=gotoT,numRules=numrules,
 numStates=numstates,initialState=STATE 0}
@@ -1091,15 +1105,17 @@ explistsemi1, _, _)) :: _ :: ( _, ( MlyValue.decs decs1, _, _)) :: ( _
 , ( _, LET1left, _)) :: rest671)) => let val  result = MlyValue.letstm
  (fn _ => let val  (decs as decs1) = decs1 ()
  val  (explistsemi as explistsemi1) = explistsemi1 ()
- in (A.LetExp{decs= decs, body=A.SeqExp(explistsemi), pos=LET1left})
-
+ in (
+A.LetExp{decs= stitchDecList decs, body=A.SeqExp(explistsemi), pos=LET1left}
+)
 end)
  in ( LrTable.NT 23, ( result, LET1left, END1right), rest671)
 end
 |  ( 45, ( ( _, ( _, _, END1right)) :: _ :: ( _, ( MlyValue.decs decs1
 , _, _)) :: ( _, ( _, LET1left, _)) :: rest671)) => let val  result = 
 MlyValue.letstm (fn _ => let val  (decs as decs1) = decs1 ()
- in (A.LetExp{decs= decs, body=A.SeqExp[], pos=LET1left})
+ in (A.LetExp{decs= stitchDecList decs, body=A.SeqExp[], pos=LET1left}
+)
 end)
  in ( LrTable.NT 23, ( result, LET1left, END1right), rest671)
 end
@@ -1264,13 +1280,13 @@ end)
  in ( LrTable.NT 5, ( result, VAR1left, exp1right), rest671)
 end
 |  ( 66, ( ( _, ( MlyValue.exp exp1, _, exp1right)) :: _ :: ( _, ( 
-MlyValue.ID ID2, _, _)) :: _ :: ( _, ( MlyValue.ID ID1, ID1left, _))
+MlyValue.ID ID2, ID2left, _)) :: _ :: ( _, ( MlyValue.ID ID1, _, _))
  :: ( _, ( _, (VARleft as VAR1left), _)) :: rest671)) => let val  
 result = MlyValue.vardec (fn _ => let val  ID1 = ID1 ()
  val  ID2 = ID2 ()
  val  (exp as exp1) = exp1 ()
  in (
-A.VarDec{name=symbol ID1,escape=ref true, typ=SOME (symbol ID1,ID1left), init=exp,pos=VARleft}
+A.VarDec{name=symbol ID1,escape=ref true, typ=SOME (symbol ID2,ID2left), init=exp,pos=VARleft}
 )
 end)
  in ( LrTable.NT 5, ( result, VAR1left, exp1right), rest671)

@@ -1,14 +1,14 @@
-/* define valid recursive types */
+/* define valid mutually recursive procedures */
 let
-/* define a list */
-type intlist = {hd: int, tl: intlist} 
 
-/* define a tree */
+function do_nothing1(a: int, b: string)=
+		do_nothing2(a+1)
 type tree ={key: int, children: treelist}
 type treelist = {hd: tree, tl: treelist}
 
-var lis:intlist := intlist { hd=0, tl= nil } 
+function do_nothing2(d: int) =
+		do_nothing1(d, "str")
 
 in
-	lis
+	do_nothing1(0, "str2")
 end
