@@ -16,17 +16,18 @@ struct
 	type venv =  E.enventry Symbol.table
 	type tenv = ty Symbol.table
 
-fun checkInt ({exp=_,ty=ty'},pos) = 
-			case ty' of Types.INT => ()
-				| _ => error pos "integer required"
-fun checkString ({exp=_,ty=ty'},pos) = 
-			case ty' of Types.STRING => ()
-				| _ => error pos "integer required"
+fun checkInt ({exp,ty},pos) = 
+			case ty of Types.INT => ()
+				| _ => ErrorMsg.error pos "integer required"
+
+fun checkString ({exp,ty},pos) = 
+			case ty of Types.STRING => ()
+				| _ => ErrorMsg.error pos "string required"
 
 fun checkComparable ({exp=_,ty=ty1},{()),ty = ty2},pos ) = 
 			case ty1 of Types.INT => checkInt ({(),ty2},pos)
 				| Types.STRING => checkString ({(),ty2},pos)
-				| _ => error pos "string or integer required"
+				| _ => ErrorMsg.error pos "string or integer required"
 
 
 (* ASK HILTON about array and record type checking*)
@@ -35,51 +36,24 @@ fun checkEqualable ({exp=_,ty=ty1},{()),ty = ty2},pos ) =
 				| Types.STRING => checkString ({(),ty2},pos)
 				| Types.ARRAY(arrayTy,unique) => ()
 				| Types.RECORD l: (symbol = s,ty = recordTy) list => ()
-				| _ => error pos "string or integer required"
+				| _ => ErrorMsg.error pos "string or integer required"
 
 fun transExp (venv, tenv) = 
-	let fun trexp (A.OpExp{left,oper = A.PlusOp, right, pos}) = 
+	let fun trexp (A.OpExp {left, oper, right, pos}) = 
+			if 
+				oper = A.PlusOp orelse oper = A.MinusOp orelse oper = A.TimesOp orelse oper = A.DivideOp 
+			then 
 					(checkInt(trexp left, pos); 
-					 checkInt(trexp right, pos);
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.MinusOp, right, pos}) = 
-					(checkInt(trexp left, pos); 
-					 checkInt(trexp right, pos);
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.TimesOp, right, pos}) = 
-					(checkInt(trexp left, pos); 
-					 checkInt(trexp right, pos);
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.DivideOp, right, pos}) = 
-					(checkInt(trexp left, pos); 
-					 checkInt(trexp right, pos);
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.EqOp, right, pos}) = 
-					(checkInt(trexp left, pos); 
-					 checkInt(trexp right, pos);
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.NeqOp, right, pos}) = 
-					(checkInt(trexp left, pos); 
-					 checkInt(trexp right, pos);
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.GeOp, right, pos}) = 
+					checkInt(trexp right, pos);
+					{exp = (),ty=Types.INT})
+			else if oper = A.EqOp orelse oper = A.NeqOp orelse oper = A.GeOp orelse oper = A.LeOp orelse oper = A.GtOp orelse oper = A.LtOp 
+					
+			then
 					(checkComparable(trexp left, trexp right, pos); 
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.LeOp, right, pos}) = 
-					(checkComparable(trexp left, trexp right, pos); 
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.GtOp, right, pos}) = 
-					(checkComparable(trexp left, trexp right, pos); 
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.LtOp, right, pos}) = 
-					(checkComparable(trexp left, trexp right, pos); 
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.EqOp, right, pos}) = 
-					(checkComparable(trexp left, trexp right, pos); 
-					 {exp = (),ty=Types.INT})
-		| trexp (A.OpExp{left,oper = A.NeqOp, right, pos}) = 
-					(checkComparable(trexp left, trexp right, pos); 
-					 {exp = (),ty=Types.INT})
+					{exp = (),ty=Types.INT})
+			else
+        			(ErrorMsg.error pos "error";
+        			{exp=(), ty=Types.INT})
 		in 
 			trexp 
 		end
