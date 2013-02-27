@@ -13,32 +13,33 @@ structure Env :> ENV =
 
 	open Symbol
 	type ty = Types.ty
-	type access = unit ref
+	type access = unit
 
-	
+	datatype enventry = VarEntry of {ty:ty}
+					  | FunEntry of {formals: ty list, result: ty}
 
 	fun base_venv_init () = 
 	let
-		fun enter (table, (name, argTys, resTy)) = enter (table, symbol name, FunEntry{formals: argTys, result: resTy})
+		fun helper ((name, fentry),table ) = Symbol.enter (table, name, fentry)
 	in 
-		foldl enter empty
+		foldl helper Symbol.empty
 		[
-		(symbol("print"), FunEntry {formals=[Types.STRING], result=Types.UNIT),
-    	(symbol("flush"), FunEntry {formals=[], result=Types.UNIT),
-    	(symbol("getchar"), FunEntry {formals=[], result=Types.STRING),
-    	(symbol("ord"), FunEntry {formals=[Types.STRING], result=Types.INT),
-    	(symbol("chr"), FunEntry {formals=[Types.INT], result=Types.STRING),
-    	(symbol("size"), FunEntry {formals=[Types.STRING], result=Types.INT),
-    	(symbol("substring"), FunEntry {formals=[Types.STRING,Types.INT,Types.INT], result=Types.STRING),
-    	(symbol("concat"), FunEntry {formals=[Types.STRING,Types.STRING], result=Types.STRING),
-    	(symbol("not"), FunEntry {formals=[Types.INT], result=Types.INT),
-    	(symbol("exit"), FunEntry {formals=[Types.INT], result=Types.UNIT)
+		(symbol("print"), FunEntry {formals=[Types.STRING], result=Types.UNIT}),
+    	(symbol("flush"), FunEntry {formals=[Types.UNIT], result=Types.UNIT}),
+    	(symbol("getchar"), FunEntry {formals=[Types.UNIT], result=Types.STRING}),
+    	(symbol("ord"), FunEntry {formals=[Types.STRING], result=Types.INT}),
+    	(symbol("chr"), FunEntry {formals=[Types.INT], result=Types.STRING}),
+    	(symbol("size"), FunEntry {formals=[Types.STRING], result=Types.INT}),
+    	(symbol("substring"), FunEntry {formals=[Types.STRING,Types.INT,Types.INT], result=Types.STRING}),
+    	(symbol("concat"), FunEntry {formals=[Types.STRING,Types.STRING], result=Types.STRING}),
+    	(symbol("not"), FunEntry {formals=[Types.INT], result=Types.INT}),
+    	(symbol("exit"), FunEntry {formals=[Types.INT], result=Types.UNIT})
   		]
 	end
 
 	fun base_tenv_init () = 
 	let
-		fun enter (table, name, ty) = enter (table, symbol name, ty)
+		fun enter ((name, ty),table) = Symbol.enter (table, name, ty)
 	in 
 		foldl enter empty
 		[

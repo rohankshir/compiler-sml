@@ -1,14 +1,17 @@
 Group is
 
+
 $/basis.cm
 $/smlnj-lib.cm
-prabsyn.sml
 absyn.sml
 errormsg.sml
 table.sig
 table.sml
 symbol.sml
-parsetest.sml
+parse.sml
 tiger.lex
 tiger.grm
+types.sml
+env.sml
+semant.sml
 $/ml-yacc-lib.cm

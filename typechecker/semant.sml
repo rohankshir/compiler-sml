@@ -14,7 +14,8 @@ struct
 	structure E = Env
 	structure Translate = struct type exp = unit end
 	type venv =  E.enventry Symbol.table
-	type tenv = ty Symbol.table
+	type tenv = Types.ty Symbol.table
+	type expty = {exp: Translate.exp , ty: Types.ty}
 
 fun checkInt ({exp,ty},pos) = 
 			case ty of Types.INT => ()
@@ -24,20 +25,21 @@ fun checkString ({exp,ty},pos) =
 			case ty of Types.STRING => ()
 				| _ => ErrorMsg.error pos "string required"
 
-fun checkComparable ({exp=_,ty=ty1},{()),ty = ty2},pos ) = 
-			case ty1 of Types.INT => checkInt ({(),ty2},pos)
-				| Types.STRING => checkString ({(),ty2},pos)
+fun checkComparable ({exp,ty} , expty2 , pos) = 
+			case ty of 
+				  Types.INT => checkInt (expty2,pos)
+				| Types.STRING => checkString (expty2,pos)
 				| _ => ErrorMsg.error pos "string or integer required"
 
-
 (* ASK HILTON about array and record type checking*)
+(*
 fun checkEqualable ({exp=_,ty=ty1},{()),ty = ty2},pos ) = 
 			case ty1 of Types.INT => checkInt ({(),ty2},pos)
 				| Types.STRING => checkString ({(),ty2},pos)
 				| Types.ARRAY(arrayTy,unique) => ()
-				| Types.RECORD l: (symbol = s,ty = recordTy) list => ()
+				| Types.RECORD l => ()
 				| _ => ErrorMsg.error pos "string or integer required"
-
+*)
 fun transExp (venv, tenv) = 
 	let fun trexp (A.OpExp {left, oper, right, pos}) = 
 			if 
@@ -54,6 +56,8 @@ fun transExp (venv, tenv) =
 			else
         			(ErrorMsg.error pos "error";
         			{exp=(), ty=Types.INT})
+        | 	trexp (A.IntExp i) = {exp=(),ty=Types.INT}
+        |	trexp (A.StringExp (s,pos)) = {exp=(),ty=Types.STRING}
 		in 
 			trexp 
 		end
@@ -61,7 +65,7 @@ fun transExp (venv, tenv) =
 
 fun transProg ast = 
 	let 
-		val {exp=result,ty=_} = transExp (E.base_env,E.base_tenv,ast)
+		val {exp=result,ty=_} = transExp (E.base_venv,E.base_tenv) ast
 	in 
 		result
 	end
