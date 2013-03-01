@@ -17,6 +17,7 @@ struct
 	type venv =  E.enventry Symbol.table
 	type tenv = Types.ty Symbol.table
 	type expty = {exp: Translate.exp , ty: Types.ty}
+
 fun lookup (tenv,s,pos) = case Symbol.look(tenv,s) of 
 					SOME ty => ty
 				|   NONE => (ErrorMsg.error pos "Invalid type";Types.INT)
@@ -66,36 +67,51 @@ fun transExp (venv, tenv) =
 			trexp 
 		end
 
-fun transDec (venv,tenv,A.VarDec{name,typ=NONE,init,pos}) = 
-		let val {exp,ty} = transExp(venv,tenv,init)
+
+fun transTy (tenv, A.NameTy(s,pos)) = lookup(tenv,s,pos)
+	| transTy(tenv, A.RecordTy l) = 
+		let 
+			fun convFieldToTuple {name,escape,typ,pos} = (name,lookup(tenv,typ,pos))
+			val tupleList = map convFieldToTuple l
+		in
+			Types.RECORD(tupleList,ref ()) (*ASK HILTON*)
+		end
+	| transTy (tenv, A.ArrayTy(s,pos)) = Types.ARRAY(lookup(tenv,s,pos),ref ())
+
+
+
+fun transDec (venv,tenv,A.VarDec{name,escape,typ=NONE,init,pos}) = 
+		let val {exp,ty} = transExp(venv,tenv) init
 		in 
 			{tenv=tenv,
 			venv = S.enter(venv,name,E.VarEntry{ty = ty})}
 		end
-|	transDec (venv,tenv,A.VarDec{name,typ=SOME (s,spos),init,pos}) =
-		let val {exp,ty} = transExp(venv,tenv,init)
-			val ty2 = lookup (tenv,s,spos)			
+|	transDec (venv,tenv,A.VarDec{name,escape,typ=SOME (symbol,pos),init,pos = varpos}) =
+		let val {exp,ty} = transExp(venv,tenv) init
+			val ty2 = lookup (tenv,symbol,pos)			
 		in 
 			if ty = ty2
 			then
 			{tenv=tenv,
 			venv = S.enter(venv,name,E.VarEntry{ty = ty})}
 			else
-			(ErrorMsg.error "Mismatching types"; {tenv=tenv,  (*ASK HILTON*)
+			(ErrorMsg.error pos "Mismatching types"; {tenv=tenv,  (*ASK HILTON*)
 			venv = S.enter(venv,name,E.VarEntry{ty = ty})})
 		end
-|	transDec (venv,tenv,A.TypeDec[{name,ty}]) = 
+|	transDec (venv,tenv,A.TypeDec[{name,ty,pos}]) = 
 		{venv = venv,
 		tenv = S.enter(tenv,name,transTy(tenv,ty))}
-| 	transDec (venv,tenv,A.FunctionDec[{name,params,body,pos,result=SOME(rt,pos)}]) =
+| 	transDec (venv,tenv,A.FunctionDec[{name,params,result=SOME(rt,pos'),body,pos}]) =
 		let val SOME(result_ty) = S.look(tenv,rt)
-			fun transparam{name,typ,pos} = 
+			fun transparam{name,escape,typ,pos} = 
 				case S.look(tenv,typ)
 				 of SOME t => {name=name,ty=t}
+
+
 			val params' = map transparam params
 			val venv' = S.enter(venv,name,E.FunEntry{formal=map #ty params',result=result_ty})
-			fun enterparam ({name,ty},venv) = S.enter(venv,name,E.VarEntry{access = (),ty=ty})
-			val venv'' = fold enterparam params' venv'
+			fun enterparam ({name,ty},venv) = S.enter(venv,name,E.VarEntry{ty=ty})
+			val venv'' = foldl enterparam venv' params' 
 		in transExp(venv'',tenv) body;
 			{venv=venv',tenv=tenv}
 		end
