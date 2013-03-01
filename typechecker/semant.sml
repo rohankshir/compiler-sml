@@ -12,11 +12,15 @@ structure Semant :> SEMANT =
 struct 
 	structure A = Absyn
 	structure E = Env
+	structure S = Symbol
 	structure Translate = struct type exp = unit end
 	type venv =  E.enventry Symbol.table
 	type tenv = Types.ty Symbol.table
 	type expty = {exp: Translate.exp , ty: Types.ty}
-
+fun lookup (tenv,s,pos) = case Symbol.look(tenv,s) of 
+					SOME ty => ty
+				|   NONE => (ErrorMsg.error pos "Invalid type";Types.INT)
+					
 fun checkInt ({exp,ty},pos) = 
 			case ty of Types.INT => ()
 				| _ => ErrorMsg.error pos "integer required"
@@ -60,6 +64,40 @@ fun transExp (venv, tenv) =
         |	trexp (A.StringExp (s,pos)) = {exp=(),ty=Types.STRING}
 		in 
 			trexp 
+		end
+
+fun transDec (venv,tenv,A.VarDec{name,typ=NONE,init,pos}) = 
+		let val {exp,ty} = transExp(venv,tenv,init)
+		in 
+			{tenv=tenv,
+			venv = S.enter(venv,name,E.VarEntry{ty = ty})}
+		end
+|	transDec (venv,tenv,A.VarDec{name,typ=SOME (s,spos),init,pos}) =
+		let val {exp,ty} = transExp(venv,tenv,init)
+			val ty2 = lookup (tenv,s,spos)			
+		in 
+			if ty = ty2
+			then
+			{tenv=tenv,
+			venv = S.enter(venv,name,E.VarEntry{ty = ty})}
+			else
+			(ErrorMsg.error "Mismatching types"; {tenv=tenv,  (*ASK HILTON*)
+			venv = S.enter(venv,name,E.VarEntry{ty = ty})})
+		end
+|	transDec (venv,tenv,A.TypeDec[{name,ty}]) = 
+		{venv = venv,
+		tenv = S.enter(tenv,name,transTy(tenv,ty))}
+| 	transDec (venv,tenv,A.FunctionDec[{name,params,body,pos,result=SOME(rt,pos)}]) =
+		let val SOME(result_ty) = S.look(tenv,rt)
+			fun transparam{name,typ,pos} = 
+				case S.look(tenv,typ)
+				 of SOME t => {name=name,ty=t}
+			val params' = map transparam params
+			val venv' = S.enter(venv,name,E.FunEntry{formal=map #ty params',result=result_ty})
+			fun enterparam ({name,ty},venv) = S.enter(venv,name,E.VarEntry{access = (),ty=ty})
+			val venv'' = fold enterparam params' venv'
+		in transExp(venv'',tenv) body;
+			{venv=venv',tenv=tenv}
 		end
 
 
