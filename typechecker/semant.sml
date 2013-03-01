@@ -109,7 +109,7 @@ fun transDec (venv,tenv,A.VarDec{name,escape,typ=NONE,init,pos}) =
 
 
 			val params' = map transparam params
-			val venv' = S.enter(venv,name,E.FunEntry{formal=map #ty params',result=result_ty})
+			val venv' = S.enter(venv,name,E.FunEntry{formals=map #ty params',result=result_ty})
 			fun enterparam ({name,ty},venv) = S.enter(venv,name,E.VarEntry{ty=ty})
 			val venv'' = foldl enterparam venv' params' 
 		in transExp(venv'',tenv) body;
