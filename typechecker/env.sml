@@ -1,10 +1,9 @@
 signature ENV = 
 sig 	
 	type access
-	type ty = Types.ty
-	datatype enventry = VarEntry of {ty:ty}
-					  | FunEntry of {formals: ty list, result: ty}
-	val base_tenv : ty Symbol.table (*predefined types*)
+	datatype enventry = VarEntry of {ty:Types.ty}
+					  | FunEntry of {formals: Types.ty list, result: Types.ty}
+	val base_tenv : Types.ty Symbol.table (*predefined types*)
 	val base_venv : enventry Symbol.table (*predefined functions*)
 end
 
@@ -13,11 +12,8 @@ structure Env :> ENV =
 
 	open Symbol
 	type access = unit
-	(* ASK HILTON *)
-
-	type ty = Types.ty
-	datatype enventry = VarEntry of {ty:ty}
-					  | FunEntry of {formals: ty list, result: ty}
+	datatype enventry = VarEntry of {ty:Types.ty}
+					  | FunEntry of {formals: Types.ty list, result: Types.ty}
 
 	fun base_venv_init () = 
 	let

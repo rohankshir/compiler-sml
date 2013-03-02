@@ -1,0 +1,633 @@
+Standard ML of New Jersey v110.75 [built: Sun Sep 30 07:51:58 2012]
+- CM.make "sources.sm";
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[autoloading done]
+[scanning sources.sm]
+
+uncaught exception Io [Io: openIn failed on "sources.sm", No such file or directory]
+  raised at: Basis/Implementation/IO/text-io-fn.sml:783.25-783.71
+             ../cm/util/safeio.sml:30.11
+             ../cm/parse/parse.sml:502.47
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):absyn.sml]
+[parsing (sources.cm):errormsg.sml]
+[parsing (sources.cm):table.sig]
+[parsing (sources.cm):table.sml]
+[parsing (sources.cm):symbol.sml]
+[parsing (sources.cm):parse.sml]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):types.sml]
+[parsing (sources.cm):semant.sml]
+[library $/ml-yacc-lib.cm is stable]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[compiling (sources.cm):tiger.grm.sig]
+[creating directory .cm/x86-unix]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):errormsg.sml]
+[code: 2672, data: 156, env: 452 bytes]
+[compiling (sources.cm):tiger.lex.sml]
+[code: 127567, data: 603, env: 3198 bytes]
+[compiling (sources.cm):table.sig]
+[code: 52, env: 222 bytes]
+[compiling (sources.cm):table.sml]
+[code: 1084, env: 329 bytes]
+[compiling (sources.cm):symbol.sml]
+[code: 1415, data: 35, env: 642 bytes]
+[compiling (sources.cm):types.sml]
+[code: 68, env: 602 bytes]
+[compiling (sources.cm):absyn.sml]
+[code: 68, env: 2868 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:17.5-28.60 Warning: match nonexhaustive
+          (a,nil) => ...
+          (FunctionDec (a :: nil),head :: l) => ...
+          (TypeDec (a :: nil),head :: l) => ...
+          (VarDec a,l) => ...
+  
+[code: 68703, data: 6687, env: 2157 bytes]
+[compiling (sources.cm):parse.sml]
+[code: 5833, data: 85, env: 125 bytes]
+[compiling (sources.cm):env.sml]
+[code: 3914, data: 142, env: 555 bytes]
+[compiling (sources.cm):semant.sml]
+semant.sml:74.17-74.35 Error: operator is not a function [tycon mismatch]
+  operator: unit
+  in expression:
+    () ref
+semant.sml:76.50-76.77 Error: operator is not a function [tycon mismatch]
+  operator: unit
+  in expression:
+    () ref
+semant.sml:80.5-112.6 Error: duplicate variable in pattern(s): pos
+semant.sml:109.17-109.21 Error: unbound variable or constructor: fold
+semant.sml:80.25-80.57 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {escape:bool ref, init:Absyn.exp, name:Absyn.symbol,
+                pos:Absyn.pos, typ:(Absyn.symbol * Absyn.pos) option}
+               -> Absyn.dec
+  argument:    {init:'Z, name:'Y, pos:'X, typ:'W option}
+  in pattern:
+    VarDec {init=init,name=name,pos=pos,typ=NONE}
+semant.sml:86.23-86.64 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {escape:bool ref, init:Absyn.exp, name:Absyn.symbol,
+                pos:Absyn.pos, typ:(Absyn.symbol * Absyn.pos) option}
+               -> Absyn.dec
+  argument:    {init:'Z, name:'Y, pos:'X, typ:('W * 'V) option}
+  in pattern:
+    VarDec {init=init,name=name,pos=pos,typ=SOME (s,spos)}
+semant.sml:98.23-98.43 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {name:Absyn.symbol, pos:Absyn.pos, ty:Absyn.ty} list
+               -> Absyn.dec
+  argument:    {name:'Z, ty:'Y} list
+  in pattern:
+    TypeDec ({name=name,ty=ty} :: nil)
+semant.sml:81.11-81.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         'X * 'W * 'V
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:87.11-87.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         Env.enventry Symbol.table * 'X * 'W
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:95.5-95.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:106.8-106.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:107.23-107.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:108.45-108.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):semant.sml]
+semant.sml:80.5-112.6 Error: duplicate variable in pattern(s): pos
+semant.sml:109.17-109.21 Error: unbound variable or constructor: fold
+semant.sml:80.25-80.57 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {escape:bool ref, init:Absyn.exp, name:Absyn.symbol,
+                pos:Absyn.pos, typ:(Absyn.symbol * Absyn.pos) option}
+               -> Absyn.dec
+  argument:    {init:'Z, name:'Y, pos:'X, typ:'W option}
+  in pattern:
+    VarDec {init=init,name=name,pos=pos,typ=NONE}
+semant.sml:86.23-86.64 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {escape:bool ref, init:Absyn.exp, name:Absyn.symbol,
+                pos:Absyn.pos, typ:(Absyn.symbol * Absyn.pos) option}
+               -> Absyn.dec
+  argument:    {init:'Z, name:'Y, pos:'X, typ:('W * 'V) option}
+  in pattern:
+    VarDec {init=init,name=name,pos=pos,typ=SOME (s,spos)}
+semant.sml:98.23-98.43 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {name:Absyn.symbol, pos:Absyn.pos, ty:Absyn.ty} list
+               -> Absyn.dec
+  argument:    {name:'Z, ty:'Y} list
+  in pattern:
+    TypeDec ({name=name,ty=ty} :: nil)
+semant.sml:81.11-81.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         'X * 'W * 'V
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:87.11-87.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         Env.enventry Symbol.table * 'X * 'W
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:95.5-95.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:106.8-106.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:107.23-107.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:108.45-108.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):semant.sml]
+semant.sml:82.5-114.6 Error: duplicate variable in pattern(s): pos
+semant.sml:111.17-111.21 Error: unbound variable or constructor: fold
+semant.sml:100.23-100.43 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {name:Absyn.symbol, pos:Absyn.pos, ty:Absyn.ty} list
+               -> Absyn.dec
+  argument:    {name:'Z, ty:'Y} list
+  in pattern:
+    TypeDec ({name=name,ty=ty} :: nil)
+semant.sml:83.11-83.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         'X * 'W * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:89.11-89.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         Env.enventry Symbol.table * 'X * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:97.5-97.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:108.8-108.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:109.23-109.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:110.45-110.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):absyn.sml]
+[compiling (sources.cm):absyn.sml]
+[code: 68, env: 2868 bytes]
+[compiling (sources.cm):semant.sml]
+semant.sml:82.5-114.6 Error: duplicate variable in pattern(s): pos
+semant.sml:111.17-111.21 Error: unbound variable or constructor: fold
+semant.sml:100.23-100.43 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {name:Absyn.symbol, pos:Absyn.pos, ty:Absyn.ty} list
+               -> Absyn.dec
+  argument:    {name:'Z, ty:'Y} list
+  in pattern:
+    TypeDec ({name=name,ty=ty} :: nil)
+semant.sml:83.11-83.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         'X * 'W * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:89.11-89.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         Env.enventry Symbol.table * 'X * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:97.5-97.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:108.8-108.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:109.23-109.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:110.45-110.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):semant.sml]
+semant.sml:113.17-113.21 Error: unbound variable or constructor: fold
+semant.sml:100.23-100.43 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {name:Absyn.symbol, pos:Absyn.pos, ty:Absyn.ty} list
+               -> Absyn.dec
+  argument:    {name:'Z, ty:'Y} list
+  in pattern:
+    TypeDec ({name=name,ty=ty} :: nil)
+semant.sml:83.11-83.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         'X * 'W * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:89.11-89.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         Env.enventry Symbol.table * 'X * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:97.5-97.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:110.8-110.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:111.23-111.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:112.45-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):semant.sml]
+semant.sml:100.23-100.43 Error: constructor and argument don't agree in pattern [tycon mismatch]
+  constructor: {name:Absyn.symbol, pos:Absyn.pos, ty:Absyn.ty} list
+               -> Absyn.dec
+  argument:    {name:'Z, ty:'Y} list
+  in pattern:
+    TypeDec ({name=name,ty=ty} :: nil)
+semant.sml:83.11-83.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         'X * 'W * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:89.11-89.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         Env.enventry Symbol.table * 'X * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:97.5-97.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:110.8-110.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:111.23-111.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:112.45-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+semant.sml:113.8-113.47 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Symbol.symbol, ty:'Z} list
+  operand:         Env.enventry Symbol.table
+  in expression:
+    ((foldl enterparam) params') venv'
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):semant.sml]
+semant.sml:83.11-83.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         'X * 'W * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:89.11-89.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         Env.enventry Symbol.table * 'X * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:97.5-97.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:110.8-110.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:111.23-111.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:112.45-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+semant.sml:113.8-113.47 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Symbol.symbol, ty:'Z} list
+  operand:         Env.enventry Symbol.table
+  in expression:
+    ((foldl enterparam) params') venv'
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):semant.sml]
+semant.sml:86.18-86.49 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {ty:Types.ty}
+  in expression:
+    VarEntry {ty=ty}
+semant.sml:89.11-89.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         _ Symbol.table * 'X * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:97.5-97.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:110.8-110.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:111.23-111.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:112.45-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+semant.sml:113.8-113.47 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Symbol.symbol, ty:'Z} list
+  operand:         _ Symbol.table
+  in expression:
+    ((foldl enterparam) params') venv'
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[compiling (sources.cm):semant.sml]
+semant.sml:86.18-86.49 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {ty:Types.ty}
+  in expression:
+    VarEntry {ty=ty}
+semant.sml:89.11-89.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         _ Symbol.table * 'X * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:97.5-97.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:110.8-110.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:111.23-111.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:112.45-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+semant.sml:113.8-113.47 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Symbol.symbol, ty:'Z} list
+  operand:         _ Symbol.table
+  in expression:
+    ((foldl enterparam) params') venv'
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):env.sml]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):env.sml]
+env.sml:18.49-18.51 Error: unbound type constructor: ty
+env.sml:18.32-18.34 Error: unbound type constructor: ty
+env.sml:17.38-17.40 Error: unbound type constructor: ty
+env.sml:11.1-54.4 Error: unmatched type specification: ty
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):env.sml]
+[compiling (sources.cm):env.sml]
+[code: 3914, data: 142, env: 548 bytes]
+[compiling (sources.cm):semant.sml]
+semant.sml:90.11-90.46 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: 'Z * 'Y
+  operand:         Env.enventry Symbol.table * 'X * Absyn.exp
+  in expression:
+    transExp (venv,tenv,init)
+semant.sml:98.5-98.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: int
+  operand:         string
+  in expression:
+    ErrorMsg.error "Mismatching types"
+semant.sml:111.8-111.39 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:'Z, pos:'Y, typ:Symbol.symbol} list
+  operand:         Absyn.field list
+  in expression:
+    (map transparam) params
+semant.sml:112.23-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:_ list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:113.45-113.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+semant.sml:114.8-114.47 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Symbol.symbol, ty:'Z} list
+  operand:         Env.enventry Symbol.table
+  in expression:
+    ((foldl enterparam) params') venv'
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):env.sml]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):env.sml]
+[code: 3914, data: 142, env: 548 bytes]
+[compiling (sources.cm):semant.sml]
+semant.sml:112.23-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:Types.ty list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:113.45-113.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {access:unit, ty:'Z}
+  in expression:
+    VarEntry {access=(),ty=ty}
+semant.sml:114.8-114.47 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: _ Symbol.table
+  operand:         {name:Absyn.symbol, ty:Types.ty} list
+  in expression:
+    (foldl enterparam) params'
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):semant.sml]
+semant.sml:112.23-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:Types.ty list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:114.8-114.47 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Env.enventry Symbol.table
+  operand:         {name:Absyn.symbol, ty:Types.ty} list
+  in expression:
+    (foldl enterparam) params'
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):semant.sml]
+[compiling (sources.cm):semant.sml]
+semant.sml:112.23-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:Types.ty list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):env.sml]
+[compiling (sources.cm):env.sml]
+[code: 3914, data: 142, env: 545 bytes]
+[compiling (sources.cm):semant.sml]
+semant.sml:87.18-87.49 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {ty:Types.ty}
+  in expression:
+    VarEntry {ty=ty}
+semant.sml:96.18-96.49 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {ty:Types.ty}
+  in expression:
+    VarEntry {ty=ty}
+semant.sml:99.18-99.49 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {ty:Env.ty}
+  operand:         {ty:Types.ty}
+  in expression:
+    VarEntry {ty=ty}
+semant.sml:112.23-112.86 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {formals:Env.ty list, result:Env.ty}
+  operand:         {formal:Types.ty list, result:Types.ty}
+  in expression:
+    FunEntry {formal=(map (fn <pat> => <exp>)) params',result=result_ty}
+semant.sml:114.8-114.47 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Symbol.symbol, ty:Env.ty} list
+  operand:         {name:Absyn.symbol, ty:Types.ty} list
+  in expression:
+    ((foldl enterparam) venv') params'
+val it = false : bool
+- CM.make "sources.cm";
+[scanning sources.cm]
+[parsing (sources.cm):env.sml]
+[compiling (sources.cm):env.sml]
+env.sml:33.23-33.31 Error: unbound variable or constructor: FunEntry
+env.sml:32.22-32.30 Error: unbound variable or constructor: FunEntry
+env.sml:31.25-31.33 Error: unbound variable or constructor: FunEntry
+env.sml:30.28-30.36 Error: unbound variable or constructor: FunEntry
+env.sml:29.23-29.31 Error: unbound variable or constructor: FunEntry
+env.sml:28.22-28.30 Error: unbound variable or constructor: FunEntry
+env.sml:27.22-27.30 Error: unbound variable or constructor: FunEntry
+env.sml:26.26-26.34 Error: unbound variable or constructor: FunEntry
+env.sml:25.24-25.32 Error: unbound variable or constructor: FunEntry
+env.sml:24.21-24.29 Error: unbound variable or constructor: FunEntry
+env.sml:11.1-52.4 Error: unmatched type specification: ty
+env.sml:11.1-52.4 Error: unmatched type specification: enventry
+env.sml:11.1-52.4 Error: unmatched constructor specification: FunEntry
+env.sml:11.1-52.4 Error: unmatched constructor specification: VarEntry
+val it = false : bool
+- 

@@ -1,1 +1,3 @@
-3 + "a"
+let var a:= 1
+in (a="hi"; a = b ; 1 = a; nil = a)
+end

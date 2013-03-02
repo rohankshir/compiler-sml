@@ -5,6 +5,7 @@ $/basis.cm
 $/smlnj-lib.cm
 absyn.sml
 errormsg.sml
+prabsyn.sml
 table.sig
 table.sml
 symbol.sml
