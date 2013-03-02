@@ -17,6 +17,7 @@ struct
 	type venv =  E.enventry Symbol.table
 	type tenv = Types.ty Symbol.table
 	type expty = {exp: Translate.exp , ty: Types.ty}
+	val nestLevel = ref 0
 
 fun lookup (tenv,s,pos) = case Symbol.look(tenv,s) of 
 					SOME ty => ty
@@ -119,12 +120,29 @@ fun transExp (venv, tenv) =
         		end
 
 
-        	| trexp (A.WhileExp {test,body,pos}) = (* WhileExp *)
+        	| trexp (A.WhileExp {test,body,pos}) = 						(* WhileExp *)
         		(checkInt (trexp test,pos);
+        		 nestLevel := !nestLevel + 1;
         		 checkUnit (trexp body,pos);
+        		 nestLevel := !nestLevel - 1;	
         		 {exp=(),ty=Types.UNIT})
-        	(* ForExp *)
-        	(* BreakExp *)
+        	| trexp (A.ForExp {var, escape, lo, hi, body, pos}) = 		(* ForExp *)
+        		let 
+        			val () = checkInt (trexp lo,pos)
+        			val () = checkInt (trexp hi,pos)
+        			val venv' = S.enter(venv,var,E.VarEntry{ty = Types.INT})
+        			val () = (nestLevel := !nestLevel + 1)
+        			val {exp,ty} = transExp (venv',tenv) body
+        			val () = (nestLevel := !nestLevel - 1)
+        			val () = checkUnit ({exp=exp,ty=ty},pos)
+        		in
+        			{exp=(),ty=ty}
+        		end
+
+        	| trexp (A.BreakExp(pos)) = 				(* BreakExp *)
+        		if (!nestLevel <> 0)
+        		then {exp=(),ty = Types.UNIT}
+        		else (ErrorMsg.error pos "Break must be within a loop"; {exp=(),ty = Types.UNIT})
         	(* LetExp *)
         	| trexp (A.LetExp{decs, body, pos}) = 
         		let 

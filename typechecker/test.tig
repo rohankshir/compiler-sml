@@ -1,3 +1,9 @@
 let var a:= 1
-in (a="hi"; a = b ; 1 = a; nil = a)
+in 
+	(while 1
+	do while 1
+	do break
+	;
+	break
+	)
 end
