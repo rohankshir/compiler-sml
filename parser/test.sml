@@ -1,0 +1,1 @@
+fun stitchDecList (a, head::l) = (a + head)::l

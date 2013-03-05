@@ -1,1 +1,9 @@
-3 + "a"
+let var a:= 1
+in 
+	(while 1
+	do while 1
+	do break
+	;
+	break
+	)
+end
