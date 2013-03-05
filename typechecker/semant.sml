@@ -32,10 +32,15 @@ fun checkUnit ({exp,ty},pos) =
 				| _ => ErrorMsg.error pos "Expression must return no value"
 
 fun checkEqualTypes (ty1,ty2,pos) =
-			if ty1 = ty2 then ()
-			else ErrorMsg.error pos "Type mismatch"
-
-fun checkString ({exp,ty},pos) = 
+			case (ty1,ty2) of 
+				(Types.RECORD(_,ref1), Types.RECORD(_,ref2)) => 
+				(if ref1=ref2 then () else (ErrorMsg.error pos "Mismatching record types"))
+				| (Types.ARRAY(_,ref1), Types.ARRAY(_,ref2)) => 
+				(if ref1=ref2 then () else (ErrorMsg.error pos "Mismatching array types"))
+				|(Types.INT,Types.INT) => ()
+				|(Types.STRING,Types.STRING) => ()
+				|(_,_)=> (ErrorMsg.error pos "Mismatching  types")
+fun checkString ({exp,ty} ,pos) = 
 			case ty of Types.STRING => ()
 				| _ => ErrorMsg.error pos "string required"
 
@@ -159,9 +164,8 @@ fun transExp (venv, tenv) =
       				checkInt (trexp size, pos);
         			case S.look(tenv,typ) of 
              			 NONE => (ErrorMsg.error pos "undeclared  type"; {exp=(), ty=Types.INT})
-          		 		|SOME (Types.ARRAY (ty, ref()))=>                  
-               				if ty<>tyinit then ( ErrorMsg.error pos "type mismatch"; {exp=(),ty=Types.INT})
-          						 else ({exp=(), ty=Types.ARRAY (ty,ref ())})
+          		 		|SOME (Types.ARRAY (ty, unique))=>                  
+               				(checkEqualTypes(tyinit,ty,pos);{exp=(), ty=Types.ARRAY (ty,unique)})
            	 end
            	 | trexp (e) = (PrintAbsyn.print(TextIO.stdOut, e); raise Fail("Unimplemented"))
 			and trvar (A.SimpleVar(id,pos)) = 
@@ -181,10 +185,11 @@ fun transExp (venv, tenv) =
 		and transTy (tenv, A.NameTy(s,pos)) = lookup(tenv,s,pos)
 			| transTy(tenv, A.RecordTy l) = 
 				let 
+					val () = print "in transTY"
 					fun convFieldToTuple {name,escape,typ,pos} = (name,lookup(tenv,typ,pos))
 					val tupleList = map convFieldToTuple l
 				in
-					Types.RECORD(tupleList,ref ()) (*ASK HILTON*)
+					(print "returning Types.record";Types.RECORD(tupleList,ref ())) (*ASK HILTON*)
 				end
 			| transTy (tenv, A.ArrayTy(s,pos)) = Types.ARRAY(lookup(tenv,s,pos),ref ())
 
@@ -212,13 +217,21 @@ fun transExp (venv, tenv) =
 		|	transDec (A.TypeDec[{name,ty,pos}],{venv,tenv}) = 
 				{venv = venv,
 				tenv = S.enter(tenv,name,transTy(tenv,ty))}
+		|	transDec (A.TypeDec l,{venv,tenv}) = 
+				let
+					fun addEmptyHeader (name,tenv) = S.enter (tenv,name,Types.NAME(name,ref NONE))
+					val tenv' = foldl addEmptyHeader tenv (map #name l)
+					fun addActualHeader ({name,ty,pos},tenv) = S.enter(tenv,name,Types.NAME(name,ref (SOME(transTy(tenv',ty)))))
+					val tenv'' = foldl addActualHeader tenv l
+				in
+				{venv = venv,
+				tenv = tenv''}
+				end
 		| 	transDec (A.FunctionDec[{name,params,result=SOME(rt,pos'),body,pos}],{venv,tenv}) =
 				let val SOME(result_ty) = S.look(tenv,rt)
 					fun transparam{name,escape,typ,pos} = 
 						case S.look(tenv,typ)
 						 of SOME t => {name=name,ty=t}
-
-
 					val params' = map transparam params
 					val venv' = S.enter(venv,name,E.FunEntry{formals=map #ty params',result=result_ty})
 					fun enterparam ({name,ty},venv) = S.enter(venv,name,E.VarEntry{ty=ty})
