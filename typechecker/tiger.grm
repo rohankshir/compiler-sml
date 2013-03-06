@@ -196,7 +196,7 @@ dec: tydec (tydec)
    | fundec (A.FunctionDec([fundec]))
 
 (* ASK HILTON *)    
-tydec: TYPE ID EQ ty  (A.TypeDec([{name= symbol ID, ty= ty, pos= TYPE1left}]))
+tydec: TYPE ID EQ ty  (A.TypeDec([{name= symbol ID, ty= ty, pos= TYPEleft}]))
 
 ty: ID    (A.NameTy(symbol ID,ID1left))
   | LBRACE tyfields RBRACE (A.RecordTy(tyfields))

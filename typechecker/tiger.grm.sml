@@ -1209,11 +1209,11 @@ end)
  in ( LrTable.NT 3, ( result, fundec1left, fundec1right), rest671)
 end
 |  ( 57, ( ( _, ( MlyValue.ty ty1, _, ty1right)) :: _ :: ( _, ( 
-MlyValue.ID ID1, _, _)) :: ( _, ( _, TYPE1left, _)) :: rest671)) =>
- let val  result = MlyValue.tydec (fn _ => let val  (ID as ID1) = ID1
- ()
+MlyValue.ID ID1, _, _)) :: ( _, ( _, (TYPEleft as TYPE1left), _)) :: 
+rest671)) => let val  result = MlyValue.tydec (fn _ => let val  (ID
+ as ID1) = ID1 ()
  val  (ty as ty1) = ty1 ()
- in (A.TypeDec([{name= symbol ID, ty= ty, pos= TYPE1left}]))
+ in (A.TypeDec([{name= symbol ID, ty= ty, pos= TYPEleft}]))
 end)
  in ( LrTable.NT 4, ( result, TYPE1left, ty1right), rest671)
 end

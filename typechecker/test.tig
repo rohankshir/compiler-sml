@@ -1,5 +1,5 @@
 let 
 type list = {first: int, rest:list}
+var l = list{first = i,rest = nil}
 in 
-3
 end
