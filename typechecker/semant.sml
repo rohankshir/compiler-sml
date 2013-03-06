@@ -22,7 +22,7 @@ struct
 
 fun actual_ty (Types.NAME (s,ty)) = 
       		(case !ty of
-      			SOME t => ! t
+      			SOME t => t
         		|NONE => raise Error (* need to change this to not throw exception *)
       			 )
     		| actual_ty t = t
@@ -151,6 +151,33 @@ fun transExp (venv, tenv) =
 				end
 
         	(* RecordExp *)
+        	| trexp (A.RecordExp {fields,typ,pos}) = 
+        		let 
+        			val actualType = actual_ty (lookup (tenv,typ,pos)) (*add type checking for if not a record*)
+        			fun findFieldType sym = 
+	        			let
+	        				fun helper((s,ty),t) = 
+		        				if s = sym
+		        				then ty
+		        				else t
+		        		in 
+		        			(case actualType of 
+		        			Types.RECORD (l,unique) => foldl helper Types.UNIT l
+		        			| _ => (ErrorMsg.error pos "Not a record type"; Types.UNIT))
+		        		end
+		        	fun checkFieldTypes (sym,exp,pos) = 
+		        		let
+		        			val t = findFieldType sym
+		        		in 
+		        			if eqTypes(t,#ty (trexp exp))
+		        			then ()
+		        			else ErrorMsg.error pos "Mismatching field types"
+		        		end 
+		        	val () = app checkFieldTypes fields
+        		in
+        			{exp = (), ty = actualType}
+        		end
+
         									
         	| trexp (A.SeqExp l) = 											(* SeqExp *)
         		let
@@ -233,7 +260,7 @@ fun transExp (venv, tenv) =
           		 		|SOME (Types.ARRAY (ty, unique))=>                  
                				(checkEqualTypes(tyinit,ty,pos);{exp=(), ty=Types.ARRAY (ty,unique)})
            	 end
-           	 | trexp (e) = (PrintAbsyn.print(TextIO.stdOut, e); raise Fail("Unimplemented"))
+           	 
 			
 
 

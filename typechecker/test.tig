@@ -1,5 +1,6 @@
 let 
-type list = {first: int, rest:list}
-var l = list{first = i,rest = nil}
-in 
+type list = {first: int, second:int}
+var l := list{first = 1, third= "a"}
+in
+1
 end
