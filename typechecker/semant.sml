@@ -22,7 +22,7 @@ struct
 
 fun actual_ty (Types.NAME (s,ty)) = 
       		(case !ty of
-      			SOME t => t
+      			SOME t => actual_ty t
         		|NONE => raise Error (* need to change this to not throw exception *)
       			 )
     		| actual_ty t = t
@@ -39,15 +39,6 @@ fun checkUnit ({exp,ty},pos) =
 			case ty of Types.UNIT => ()
 				| _ => ErrorMsg.error pos "Expression must return no value"
 
-fun checkEqualTypes (ty1,ty2,pos) =
-			case (ty1,ty2) of 
-				(Types.RECORD(_,ref1), Types.RECORD(_,ref2)) => 
-				(if ref1=ref2 then () else (ErrorMsg.error pos "Mismatching record types"))
-				| (Types.ARRAY(_,ref1), Types.ARRAY(_,ref2)) => 
-				(if ref1=ref2 then () else (ErrorMsg.error pos "Mismatching array types"))
-				|(Types.INT,Types.INT) => ()
-				|(Types.STRING,Types.STRING) => ()
-				|(_,_)=> (ErrorMsg.error pos "Mismatching  types")
 fun checkString ({exp,ty} ,pos) = 
 			case ty of Types.STRING => ()
 				| _ => ErrorMsg.error pos "string required"
@@ -257,8 +248,15 @@ fun transExp (venv, tenv) =
       				checkInt (trexp size, pos);
         			case S.look(tenv,typ) of 
              			 NONE => (ErrorMsg.error pos "undeclared  type"; {exp=(), ty=Types.INT})
-          		 		|SOME (Types.ARRAY (ty, unique))=>                  
-               				(checkEqualTypes(tyinit,ty,pos);{exp=(), ty=Types.ARRAY (ty,unique)})
+          		 		|SOME t=> 
+          		 			case actual_ty t  of
+          		 			Types.ARRAY (ty,unique) =>              
+               				(if eqTypes(tyinit,ty) 
+               					then {exp = (), ty=Types.ARRAY (ty,unique) }
+               					else (ErrorMsg.error pos ("Expected: " ^ Types.toString ty ^ " Actual: " ^ Types.toString tyinit); {exp = (), ty = Types.UNIT}))
+               				| _ => (ErrorMsg.error pos (S.name typ ^" is not of array type"); {exp = (), ty = Types.UNIT})
+               
+               			
            	 end
            	 
 			
