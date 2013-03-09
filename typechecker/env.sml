@@ -22,8 +22,8 @@ structure Env :> ENV =
 		foldl helper Symbol.empty
 		[
 		(symbol("print"), FunEntry {formals=[Types.STRING], result=Types.UNIT}),
-    	(symbol("flush"), FunEntry {formals=[Types.UNIT], result=Types.UNIT}),
-    	(symbol("getchar"), FunEntry {formals=[Types.UNIT], result=Types.STRING}),
+    	(symbol("flush"), FunEntry {formals=[], result=Types.UNIT}),
+    	(symbol("getchar"), FunEntry {formals=[], result=Types.STRING}),
     	(symbol("ord"), FunEntry {formals=[Types.STRING], result=Types.INT}),
     	(symbol("chr"), FunEntry {formals=[Types.INT], result=Types.STRING}),
     	(symbol("size"), FunEntry {formals=[Types.STRING], result=Types.INT}),

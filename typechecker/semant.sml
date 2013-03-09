@@ -108,7 +108,7 @@ fun transExp (venv, tenv) =
         					in 
         						if eqTypeList(formals, argtys) 
         						then {exp = (), ty=actual_ty result} 
-        						else ((ErrorMsg.error pos "function arguments do not agree"); {exp=(),ty=Types.UNIT})
+        						else (ErrorMsg.error pos ((S.name func) ^"function arguments do not agree"); {exp=(),ty=Types.UNIT})
         					end
         			| 	SOME (E.VarEntry{ty}) => ((ErrorMsg.error pos "undefined function"); {exp = (), ty = Types.UNIT})	
         			| 	NONE => (ErrorMsg.error pos "undefined function"	; {exp = (), ty = Types.UNIT}))
@@ -348,11 +348,45 @@ fun transExp (venv, tenv) =
 					fun transparam{name,escape,typ,pos} = 
 						case S.look(tenv,typ)
 						 of SOME t => {name=name,ty=t}
+						| NONE => (print ((S.name typ)^"undefined type"); {name=name,ty=Types.UNIT})
 					val params' = map transparam params
 					val venv' = S.enter(venv,name,E.FunEntry{formals=map #ty params',result=result_ty})
 					fun enterparam ({name,ty},venv) = S.enter(venv,name,E.VarEntry{ty=ty})
 					val venv'' = foldl enterparam venv' params' 
 				in transExp(venv'',tenv) body;
+					{venv=venv',tenv=tenv}
+				end
+		| 	transDec (A.FunctionDec l,{venv,tenv}) =
+				let 
+					fun getResultType (SOME(rt,pos)) = (case S.look(tenv,rt) of 
+														SOME(t)=> t
+													    | NONE => (ErrorMsg.error pos "Return type not valid";Types.UNIT))
+					|   getResultType NONE = Types.UNIT
+					fun transparam{name,escape,typ,pos} = 
+								case S.look(tenv,typ)
+								 of SOME t => {name=name,ty=t}
+								| NONE => (print ((S.name typ)^" undefined type"); {name=name,ty=Types.UNIT})
+					fun addHeaders ({name,params,result,body,pos}, venv) = 
+						let 
+							val result_ty = getResultType result
+							val params' = map transparam params
+					 	in 
+					 		S.enter(venv,name,E.FunEntry{formals=map #ty params',result=result_ty})
+						end
+
+					val venv' = foldl addHeaders venv l
+					fun processBodies {name,params,result,body,pos} = 
+						let
+							val result_ty = getResultType result
+							val params' = map transparam params
+							fun enterparam ({name,ty},venv) = S.enter(venv,name,E.VarEntry{ty=ty})
+							val venv'' = foldl enterparam venv' params' 
+							val bodyType = #ty (transExp(venv'',tenv) body)
+						in
+						if eqTypes(bodyType,result_ty) then () else (ErrorMsg.error pos "function does not evaluate to correct type")
+						end
+					val () = app processBodies l
+				in 
 					{venv=venv',tenv=tenv}
 				end
 

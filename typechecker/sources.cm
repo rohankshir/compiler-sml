@@ -15,4 +15,5 @@ tiger.grm
 types.sml
 env.sml
 semant.sml
+main.sml
 $/ml-yacc-lib.cm
