@@ -27,7 +27,7 @@ function readint(any: any) : int =
          else nil
     end
 
- function merge(a: int, b: list) : list =
+ function merge(a: list, b: list) : list =
    if a=nil then b
    else if b=nil then a
    else if a.first < b.first 
