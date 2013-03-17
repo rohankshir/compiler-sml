@@ -1274,12 +1274,6 @@ state 61:
 	operation : exp . GT exp 
 	operation : exp . LT exp 
 
-	EOF	reduce by rule 32
-	COMMA	reduce by rule 32
-	SEMICOLON	reduce by rule 32
-	RPAREN	reduce by rule 32
-	RBRACK	reduce by rule 32
-	RBRACE	reduce by rule 32
 	PLUS	shift 39
 	MINUS	shift 38
 	TIMES	shift 37
@@ -1291,18 +1285,9 @@ state 61:
 	GT	shift 31
 	GE	shift 30
 	AND	shift 29
-	THEN	reduce by rule 32
-	ELSE	reduce by rule 32
-	TO	reduce by rule 32
-	DO	reduce by rule 32
-	IN	reduce by rule 32
-	END	reduce by rule 32
-	FUNCTION	reduce by rule 32
-	VAR	reduce by rule 32
-	TYPE	reduce by rule 32
 
 
-	.	error
+	.	reduce by rule 32
 
 
 state 62:
@@ -1321,12 +1306,6 @@ state 62:
 	operation : exp . GT exp 
 	operation : exp . LT exp 
 
-	EOF	reduce by rule 31
-	COMMA	reduce by rule 31
-	SEMICOLON	reduce by rule 31
-	RPAREN	reduce by rule 31
-	RBRACK	reduce by rule 31
-	RBRACE	reduce by rule 31
 	PLUS	shift 39
 	MINUS	shift 38
 	TIMES	shift 37
@@ -1337,19 +1316,9 @@ state 62:
 	LE	shift 32
 	GT	shift 31
 	GE	shift 30
-	OR	reduce by rule 31
-	THEN	reduce by rule 31
-	ELSE	reduce by rule 31
-	TO	reduce by rule 31
-	DO	reduce by rule 31
-	IN	reduce by rule 31
-	END	reduce by rule 31
-	FUNCTION	reduce by rule 31
-	VAR	reduce by rule 31
-	TYPE	reduce by rule 31
 
 
-	.	error
+	.	reduce by rule 31
 
 
 state 63:
@@ -3356,5 +3325,5 @@ state 152:
 
 	.	error
 
-572 of 1091 action table entries left after compaction
+541 of 1060 action table entries left after compaction
 579 goto table entries

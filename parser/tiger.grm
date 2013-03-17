@@ -55,6 +55,7 @@ fun createVar (current,result) =
   | sequence of A.exp 
   | functionstm of A.exp
   | operation of A.exp
+  | booloperation of A.exp
   | arraystm of A.exp
   | ifthenelse of A.exp
   | ifthen of A.exp
@@ -75,10 +76,10 @@ fun createVar (current,result) =
 %nonassoc THEN 
 %right ELSE 
 %right ASSIGN
-%nonassoc OR
-%nonassoc AND
+%left OR
+%left AND
 %nonassoc EQ NEQ GT LT GE LE
-%left PLUS MINUS
+%left MINUS PLUS
 %left TIMES DIVIDE
 %left UMINUS
 
@@ -115,6 +116,7 @@ exp: literal (literal)
   | sequence (sequence)
   | functionstm (functionstm)
   | assignment (assignment)
+  | booloperation (booloperation)
   | operation (operation)
   | arraystm (arraystm)
   | ifthenelse (ifthenelse)
@@ -147,9 +149,9 @@ operation: exp PLUS exp(A.OpExp{left=exp1,oper=A.PlusOp,right=exp2,pos=exp1left}
   |  exp MINUS  exp     (A.OpExp{left=exp1,oper=A.MinusOp,right=exp2,pos=exp1left})
   |  exp TIMES  exp     (A.OpExp{left=exp1,oper=A.TimesOp,right=exp2,pos=exp1left})
   |  exp DIVIDE   exp   (A.OpExp{left=exp1,oper=A.DivideOp,right=exp2,pos=exp1left})
-
-  |  exp AND  exp  (A.IfExp{test=exp1,then'=exp2,else'=SOME (A.IntExp(0)),pos=exp1left})
-  |  exp OR   exp  (A.IfExp{test=exp1,then'=A.IntExp(1),else'= SOME (exp2),pos=exp1left})
+booloperation:
+   exp AND  exp  (A.IfExp{test=exp1,then'=exp2,else'=SOME (A.IntExp(0)),pos=exp1left})
+  |  exp OR   exp  (A.IfExp{test=exp1,then'=A.IntExp(1),else'= SOME exp2,pos=exp1left})
 
   |  exp  EQ  exp  (A.OpExp{left=exp1,oper=A.EqOp,right=exp2,pos=exp1left})
   |  exp NEQ  exp   (A.OpExp{left=exp1,oper=A.NeqOp,right=exp2,pos=exp1left})

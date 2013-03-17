@@ -4,10 +4,6 @@ sig
 end
 
 
-
-
-
-
 structure Semant :> SEMANT = 
 struct 
 	structure A = Absyn
@@ -43,32 +39,9 @@ fun checkString ({exp,ty} ,pos) =
 			case ty of Types.STRING => ()
 				| _ => ErrorMsg.error pos "string required"
 
-fun checkComparable ({exp,ty} , expty2 , pos) = 
-			case ty of 
-				  Types.INT => checkInt (expty2,pos)
-				| Types.STRING => checkString (expty2,pos)
-				| _ => ErrorMsg.error pos "string or integer required"
-
-
-fun checkEqualable ({exp=_,ty=ty1}, {exp=_,ty=ty2}, pos) = 
-			case (ty1,ty2) of 
-				(Types.NIL,Types.RECORD(_)) => ()
-				| (Types.RECORD(_), Types.NIL) => ()
-				| (Types.RECORD(_,ref1), Types.RECORD(_,ref2)) => 
-						(if ref1=ref2 then () else (ErrorMsg.error pos "error"))
-				| (ty1, ty2) => checkComparable({exp=(),ty=ty1},{exp=(),ty=ty2},pos)
-
 fun checkUnit ({exp,ty},pos) = 
 			case ty of Types.UNIT => ()
 				| _ => ErrorMsg.error pos "Expression must return no value"
-
-fun checkArray({exp,ty},pos) =
-        	case ty of Types.ARRAY _ => ()
-                 | _     => ErrorMsg.error pos "array required"
-
-fun checkRecord({exp,ty},pos) =
-        	case ty of Types.RECORD _ => ()
-                 | _     => ErrorMsg.error pos "record required"
 
 fun eqTypes (ty1,ty2) =
 			case (ty1,ty2) of 
@@ -91,9 +64,6 @@ fun eqTypeList ([],[]) = true
 
 
 				    
- 
-  
-
 fun transExp (venv, tenv) = 
 	let fun trexp (A.VarExp v) = trvar v 									(* VarExp *)
 			| 	trexp (A.NilExp) = {exp = (), ty = Types.NIL}				(* NilExp *)
@@ -126,25 +96,31 @@ fun transExp (venv, tenv) =
 					|  {exp=_,ty=Types.STRING} => checkString(right', pos)
 					|  {exp=_,ty=Types.ARRAY(_)} =>
 						(case oper 
-							of A.EqOp => (checkArray(right', pos); eqTypes(#ty left', #ty right');())
-							|  A.NeqOp => (checkArray(right', pos); eqTypes(#ty left', #ty right');())
+							of A.EqOp => (if eqTypes(#ty left', #ty right') then () else ErrorMsg.error pos "type mismatch")
+							|  A.NeqOp => (if eqTypes(#ty left', #ty right') then () else ErrorMsg.error pos "type mismatch")
 							| _ => (ErrorMsg.error pos "operation not valid for ARRAYS")
 						)
 					| 	{exp=_,ty=Types.RECORD(_)} =>
 						(case oper 
-							of A.EqOp => (checkRecord(right', pos); eqTypes(#ty left', #ty right');())
-							|  A.NeqOp => (checkRecord(right', pos); eqTypes(#ty left', #ty right');())
+							of A.EqOp => (if eqTypes(#ty left', #ty right') then () else ErrorMsg.error pos "type mismatch")
+							|  A.NeqOp => (if eqTypes(#ty left', #ty right') then () else ErrorMsg.error pos "type mismatch")
 							| _ => (ErrorMsg.error pos "operation not valid for RECORDS")
+						)
+					| 	{exp=_,ty=Types.NIL} =>
+						(case oper 
+							of A.EqOp => (if eqTypes(#ty left', #ty right') then () else ErrorMsg.error pos "type mismatch")
+							|  A.NeqOp => (if eqTypes(#ty left', #ty right') then () else ErrorMsg.error pos "type mismatch")
+							| _ => (ErrorMsg.error pos "operation not valid for NIL")
 						)
 					| 	_ => (ErrorMsg.error pos "invalid operation")
 				);
 				{exp = (), ty = Types.INT})
 				end
 
-        	(* RecordExp *)
-        	| trexp (A.RecordExp {fields,typ,pos}) = 
+        	
+        	| trexp (A.RecordExp {fields,typ,pos}) = 						(* RecordExp *)
         		let 
-        			val actualType = actual_ty (lookup (tenv,typ,pos)) (*add type checking for if not a record*)
+        			val actualType = actual_ty (lookup (tenv,typ,pos)) 
         			fun findFieldType sym = 
 	        			let
 	        				fun helper((s,ty),t) = 
@@ -178,7 +154,7 @@ fun transExp (venv, tenv) =
         			seqHelper l
         		end
 
-        	| trexp (A.AssignExp {var,exp,pos} ) =						(* AssignExp *)
+        	| trexp (A.AssignExp {var,exp,pos} ) =							(* AssignExp *)
         		let
         			val var_ty = #ty (trvar (var))
         			val exp_ty = #ty (trexp (exp))
@@ -191,7 +167,7 @@ fun transExp (venv, tenv) =
 
 
   
-        	| trexp (A.IfExp {test, then' = thenexp, else' = NONE, pos}) =  				(* IfExp *)
+        	| trexp (A.IfExp {test, then' = thenexp, else' = NONE, pos}) =  (* IfExp *)
         		(checkInt(trexp test,pos);
         		checkUnit(trexp thenexp,pos);
         		{exp = (),ty=Types.UNIT})
@@ -204,18 +180,18 @@ fun transExp (venv, tenv) =
         			(checkInt(trexp test,pos);
         		 	if eqTypes(then_ty, else_ty) 
         		 	then {exp=(),ty=then_ty}
-        		 	else (ErrorMsg.error pos "then and else expressions mus have same type"; {exp=(),ty=then_ty})
+        		 	else (ErrorMsg.error pos "then and else expressions must have same type"; {exp=(),ty=then_ty})
         		 	)
         		end
 
 
-        	| trexp (A.WhileExp {test,body,pos}) = 						(* WhileExp *)
+        	| trexp (A.WhileExp {test,body,pos}) = 							(* WhileExp *)
         		(checkInt (trexp test,pos);
         		 nestLevel := !nestLevel + 1;
         		 checkUnit (trexp body,pos);
         		 nestLevel := !nestLevel - 1;	
         		 {exp=(),ty=Types.UNIT})
-        	| trexp (A.ForExp {var, escape, lo, hi, body, pos}) = 		(* ForExp *)
+        	| trexp (A.ForExp {var, escape, lo, hi, body, pos}) = 			(* ForExp *)
         		let 
         			val () = checkInt (trexp lo,pos)
         			val () = checkInt (trexp hi,pos)
@@ -228,20 +204,22 @@ fun transExp (venv, tenv) =
         			{exp=(),ty=ty}
         		end
 
-        	| trexp (A.BreakExp(pos)) = 				(* BreakExp *)
+        	| trexp (A.BreakExp(pos)) = 									(* BreakExp *)
         		if (!nestLevel <> 0)
         		then {exp=(),ty = Types.UNIT}
         		else (ErrorMsg.error pos "Break must be within a loop"; {exp=(),ty = Types.UNIT})
-        	| trexp (A.LetExp{decs, body, pos}) = 
+
+
+        	| trexp (A.LetExp{decs, body, pos}) = 							(* LetExp *)
         		let 
         			val {venv = venv', tenv = tenv'} = transDecs(venv,tenv,decs)
         		in 
         			transExp(venv',tenv') body
         		end
         	
-            (* ArrayExp *)
+            
 
-        	| trexp (A.ArrayExp {typ, size, init, pos})=
+        	| trexp (A.ArrayExp {typ, size, init, pos})=					(* ArrayExp *)
       			let 
           			val {exp=_, ty=tyinit}=trexp init;
       			in
@@ -254,14 +232,10 @@ fun transExp (venv, tenv) =
                				(if eqTypes(tyinit,ty) 
                					then {exp = (), ty=Types.ARRAY (ty,unique) }
                					else (ErrorMsg.error pos ("Expected: " ^ Types.toString ty ^ " Actual: " ^ Types.toString tyinit); {exp = (), ty = Types.UNIT}))
-               				| _ => (ErrorMsg.error pos (S.name typ ^" is not of array type"); {exp = (), ty = Types.UNIT})
-               
-               			
+               				| _ => (ErrorMsg.error pos (S.name typ ^" is not of array type"); {exp = (), ty = Types.UNIT})   			
            	 end
            	 
 			
-
-
 			and trvar (A.SimpleVar(id,pos)) = 
 			(case Symbol.look(venv, id)
 				of SOME(E.VarEntry{ty}) => 
@@ -325,8 +299,8 @@ fun transExp (venv, tenv) =
 					{tenv=tenv,
 					venv = S.enter(venv,name,E.VarEntry{ty = ty})}
 					else
-					(ErrorMsg.error pos "Mismatching types"; {tenv=tenv,  (*ASK HILTON*)
-					venv = S.enter(venv,name,E.VarEntry{ty = ty})})
+					(ErrorMsg.error pos "Mismatching types"; 
+					{tenv=tenv, venv = S.enter(venv,name,E.VarEntry{ty = ty})})
 				end
 		|	transDec (A.TypeDec l,{venv,tenv}) = 
 				let
@@ -336,7 +310,6 @@ fun transExp (venv, tenv) =
 					val tenv' = foldl addEmptyHeader tenv names
 					fun replace(Types.NAME(n,r),ty) =  r := SOME ty 
 					   | replace(_,_) = raise Fail("How is that not a NAME") 
-					(*val types = map (fn n => (S.look (tenv', n)))  names *)
 					fun replaceHeaders {name,ty,pos} = replace(Option.valOf(S.look (tenv',name)), transTy(tenv',ty))
 					val () = app replaceHeaders  l
 				in

@@ -1,55 +1,34 @@
-let 
+/* A program to solve the 8-queens problem */
 
- type any = {any : int}
- var buffer := getchar()
+let
+    var N := 8
 
-function readint(any: any) : int =
- let var i := 0
-     function isdigit(s : string) : int = 
-		  ord(buffer)>=ord("0") & ord(buffer)<=ord("9")
-     function skipto() =
-       while buffer=" " | buffer="\n"
-         do buffer := getchar()
-  in skipto();
-     any.any := isdigit(buffer);
-     while isdigit(buffer)
-       do (i := i*10+ord(buffer)-ord("0"); buffer := getchar());
-     i
- end
+    type intArray = array of int
 
- type list = {first: int, rest: list}
+    var row := intArray [ N ] of 0
+    var col := intArray [ N ] of 0
+    var diag1 := intArray [N+N-1] of 0
+    var diag2 := intArray [N+N-1] of 0
 
- function readlist() : list =
-    let var any := any{any=0}
-        var i := readint(any)
-     in if any.any
-         then list{first=i,rest=readlist()}
-         else nil
-    end
+    function printboard() =
+       (for i := 0 to N-1
+   do (for j := 0 to N-1 
+        do print(if col[i]=j then " O" else " .");
+       print("\n"));
+         print("\n"))
 
- function merge(a: list, b: list) : list =
-   if a=nil then b
-   else if b=nil then a
-   else if a.first < b.first 
-      then list{first=a.first,rest=merge(a.rest,b)}
-      else list{first=b.first,rest=merge(a,b.rest)}
+    function try(c:int) = 
+( /*  for i:= 0 to c do print("."); print("\n"); flush();*/
+     if c=N
+     then printboard()
+     else for r := 0 to N-1
+     do if row[r]=0 & diag1[r+c]=0 & diag2[r+7-c]=0
+             then (row[r]:=1; diag1[r+c]:=1; diag2[r+7-c]:=1;
+             col[c]:=r;
+                   try(c+1);
+       row[r]:=0; diag1[r+c]:=0; diag2[r+7-c]:=0)
 
- function printint(i: int) =
-  let function f(i:int) = if i>0 
-	     then (f(i/10); print(chr(i-i/10*10+ord("0"))))
-   in if i<0 then (print("-"); f(-i))
-      else if i>0 then f(i)
-      else print("0")
-  end
-
- function printlist(l: list) =
-   if l=nil then print("\n")
-   else (printint(l.first); print(" "); printlist(l.rest))
-
-   var list1 := readlist()
-   var list2 := (buffer:=getchar(); readlist())
-
-
-  /* BODY OF MAIN PROGRAM */
- in printlist(merge(list1,list2))
+)
+ in try(0)
 end
+  
