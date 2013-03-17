@@ -19,33 +19,34 @@ struct
 fun actual_ty (Types.NAME (s,ty)) = 
       		(case !ty of
       			SOME t => actual_ty t
-        		|NONE => raise Error (* need to change this to not throw exception *)
+        		|NONE => raise Error 
       			 )
     		| actual_ty t = t
 
 fun lookup (tenv,s,pos) = case Symbol.look(tenv,s) of 
 					SOME ty => ty
-				|   NONE => (ErrorMsg.error pos "Invalid type";Types.UNIT)
+				|   NONE => (ErrorMsg.error pos "Invalid type";Types.BOTTOM)
 					
 fun checkInt ({exp,ty},pos) = 
 			case ty of Types.INT => ()
+				| Types.BOTTOM => ()
 				| _ => ErrorMsg.error pos "integer required"
 
 fun checkUnit ({exp,ty},pos) = 
 			case ty of Types.UNIT => ()
+				| Types.BOTTOM => ()
 				| _ => ErrorMsg.error pos "Expression must return no value"
 
 fun checkString ({exp,ty} ,pos) = 
 			case ty of Types.STRING => ()
+				| Types.BOTTOM => ()
 				| _ => ErrorMsg.error pos "string required"
-
-fun checkUnit ({exp,ty},pos) = 
-			case ty of Types.UNIT => ()
-				| _ => ErrorMsg.error pos "Expression must return no value"
 
 fun eqTypes (ty1,ty2) =
 			case (ty1,ty2) of 
-				(Types.RECORD(_,u1), Types.RECORD(_,u2)) => (u1=u2)
+					(Types.BOTTOM,_) => true
+				| (_, Types.BOTTOM) => true
+				| (Types.RECORD(_,u1), Types.RECORD(_,u2)) => (u1=u2)
 				| (Types.ARRAY(_,u1),Types.ARRAY(_,u2)) => 	(u1=u2)
 				| (Types.NAME(_,_), Types.NAME(_,_)) => eqTypes(actual_ty ty1, actual_ty ty2)
 				| (Types.NAME(_,_),_) => eqTypes(actual_ty ty1,ty2)
@@ -78,10 +79,10 @@ fun transExp (venv, tenv) =
         					in 
         						if eqTypeList(formals, argtys) 
         						then {exp = (), ty=actual_ty result} 
-        						else (ErrorMsg.error pos ((S.name func) ^"function arguments do not agree"); {exp=(),ty=Types.UNIT})
+        						else (ErrorMsg.error pos ((S.name func) ^"function arguments do not agree"); {exp=(),ty=Types.BOTTOM})
         					end
-        			| 	SOME (E.VarEntry{ty}) => ((ErrorMsg.error pos "undefined function"); {exp = (), ty = Types.UNIT})	
-        			| 	NONE => (ErrorMsg.error pos "undefined function"	; {exp = (), ty = Types.UNIT}))
+        			| 	SOME (E.VarEntry{ty}) => ((ErrorMsg.error pos "undefined function"); {exp = (), ty = Types.BOTTOM})	
+        			| 	NONE => (ErrorMsg.error pos "undefined function"	; {exp = (), ty = Types.BOTTOM}))
 
 
        
@@ -91,6 +92,7 @@ fun transExp (venv, tenv) =
 					val left' = trexp left
 					val right' = trexp right
 				in 
+
 				((case (left') 
 					of {exp=_,ty=Types.INT} => checkInt(right', pos)
 					|  {exp=_,ty=Types.STRING} => checkString(right', pos)
@@ -112,6 +114,7 @@ fun transExp (venv, tenv) =
 							|  A.NeqOp => (if eqTypes(#ty left', #ty right') then () else ErrorMsg.error pos "type mismatch")
 							| _ => (ErrorMsg.error pos "operation not valid for NIL")
 						)
+					| 	{exp=_, ty = Types.BOTTOM} => ()
 					| 	_ => (ErrorMsg.error pos "invalid operation")
 				);
 				{exp = (), ty = Types.INT})
@@ -130,7 +133,7 @@ fun transExp (venv, tenv) =
 		        		in 
 		        			(case actualType of 
 		        			Types.RECORD (l,unique) => foldl helper Types.UNIT l
-		        			| _ => (ErrorMsg.error pos "Not a record type"; Types.UNIT))
+		        			| _ => (ErrorMsg.error pos "Not a record type"; Types.BOTTOM))
 		        		end
 		        	fun checkFieldTypes (sym,exp,pos) = 
 		        		let
@@ -161,7 +164,7 @@ fun transExp (venv, tenv) =
         		in 
         			if (eqTypes(var_ty,exp_ty))
         			then {exp = (), ty = Types.UNIT}
-        			else (ErrorMsg.error pos "type mismatch in var assignment";{exp = (), ty = Types.UNIT})
+        			else (ErrorMsg.error pos "type mismatch in var assignment";{exp = (), ty = Types.BOTTOM})
         		end
 
 
@@ -207,7 +210,7 @@ fun transExp (venv, tenv) =
         	| trexp (A.BreakExp(pos)) = 									(* BreakExp *)
         		if (!nestLevel <> 0)
         		then {exp=(),ty = Types.UNIT}
-        		else (ErrorMsg.error pos "Break must be within a loop"; {exp=(),ty = Types.UNIT})
+        		else (ErrorMsg.error pos "Break must be within a loop"; {exp=(),ty = Types.BOTTOM})
 
 
         	| trexp (A.LetExp{decs, body, pos}) = 							(* LetExp *)
@@ -225,14 +228,14 @@ fun transExp (venv, tenv) =
       			in
       				checkInt (trexp size, pos);
         			case S.look(tenv,typ) of 
-             			 NONE => (ErrorMsg.error pos "undeclared  type"; {exp=(), ty=Types.INT})
+             			 NONE => (ErrorMsg.error pos "undeclared  type"; {exp=(), ty=Types.BOTTOM})
           		 		|SOME t=> 
           		 			case actual_ty t  of
           		 			Types.ARRAY (ty,unique) =>              
                				(if eqTypes(tyinit,ty) 
                					then {exp = (), ty=Types.ARRAY (ty,unique) }
-               					else (ErrorMsg.error pos ("Expected: " ^ Types.toString ty ^ " Actual: " ^ Types.toString tyinit); {exp = (), ty = Types.UNIT}))
-               				| _ => (ErrorMsg.error pos (S.name typ ^" is not of array type"); {exp = (), ty = Types.UNIT})   			
+               					else (ErrorMsg.error pos ("Expected: " ^ Types.toString ty ^ " Actual: " ^ Types.toString tyinit); {exp = (), ty = Types.BOTTOM}))
+               				| _ => (ErrorMsg.error pos (S.name typ ^" is not of array type"); {exp = (), ty = Types.BOTTOM})   			
            	 end
            	 
 			
@@ -241,7 +244,7 @@ fun transExp (venv, tenv) =
 				of SOME(E.VarEntry{ty}) => 
 					{exp = (), ty=actual_ty ty}
 					| NONE => (ErrorMsg.error pos ("undefined variable " ^ Symbol.name id);
-									{exp = (), ty = Types.INT}))
+									{exp = (), ty = Types.BOTTOM}))
 
             | trvar (A.FieldVar(var,id,pos)) = 
             (case trvar var
@@ -252,18 +255,19 @@ fun transExp (venv, tenv) =
                     (case (List.find idfinder fields)
                         of SOME(_,ty) => {exp=(),ty=actual_ty ty}
                          | NONE       => (ErrorMsg.error pos ("record does not have this field" ^ Symbol.name id);
-                                    {exp=(),ty=Types.UNIT}))
+                                    {exp=(),ty=Types.BOTTOM}))
                     end)
                | {exp,ty} => (ErrorMsg.error pos "not a record type";
-                              {exp=(), ty=Types.UNIT}))
+                              {exp=(), ty=Types.BOTTOM}))
 
             | trvar (A.SubscriptVar(var, exp, pos)) =
                 (checkInt((trexp exp), pos);
                 (case (#ty (trvar var)) of 
                 Types.ARRAY(ty, _) => 
                     {exp=(), ty=actual_ty ty}
+                | Types.BOTTOM => {exp = (), ty = Types.BOTTOM}
                 | _ => (ErrorMsg.error pos ("not an array type");
-                    {exp=(), ty=Types.UNIT})))
+                    {exp=(), ty=Types.BOTTOM})))
 			in 
 				trexp 
 			end
@@ -321,7 +325,7 @@ fun transExp (venv, tenv) =
 					fun transparam{name,escape,typ,pos} = 
 						case S.look(tenv,typ)
 						 of SOME t => {name=name,ty=t}
-						| NONE => (print ((S.name typ)^"undefined type"); {name=name,ty=Types.UNIT})
+						| NONE => (print ((S.name typ)^"undefined type"); {name=name,ty=Types.BOTTOM})
 					val params' = map transparam params
 					val venv' = S.enter(venv,name,E.FunEntry{formals=map #ty params',result=result_ty})
 					fun enterparam ({name,ty},venv) = S.enter(venv,name,E.VarEntry{ty=ty})
@@ -333,7 +337,7 @@ fun transExp (venv, tenv) =
 				let 
 					fun getResultType (SOME(rt,pos)) = (case S.look(tenv,rt) of 
 														SOME(t)=> t
-													    | NONE => (ErrorMsg.error pos "Return type not valid";Types.UNIT))
+													    | NONE => (ErrorMsg.error pos "Return type not valid";Types.BOTTOM))
 					|   getResultType NONE = Types.UNIT
 					fun transparam{name,escape,typ,pos} = 
 								case S.look(tenv,typ)
