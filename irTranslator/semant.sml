@@ -73,7 +73,7 @@ fun transExp (venv, tenv, level) =
         	|	trexp (A.StringExp (s,pos)) = {exp=(),ty=Types.STRING}		(* StringExp *)
         	|	trexp (A.CallExp {func, args, pos}) = 						(* CallExp *)
         		(case Symbol.look(venv,func) of 
-        				SOME (E.FunEntry {formals, result}) => 
+        				SOME (E.FunEntry {level,label,formals, result}) => 
         					let 
 
         						val argtys = map #ty (map trexp args)
@@ -219,7 +219,7 @@ fun transExp (venv, tenv, level) =
 
         	| trexp (A.LetExp{decs, body, pos}) = 							(* LetExp *)
         		let 
-        			val {venv = venv', tenv = tenv']} = transDecs(venv,tenv,decs)
+        			val {venv = venv', tenv = tenv',level = level} = transDecs(venv,tenv,level,decs)
         		in 
         			transExp(venv',tenv',level) body
         		end
@@ -294,24 +294,25 @@ fun transExp (venv, tenv, level) =
 
 		and transDec (A.VarDec{name,escape,typ=NONE,init,pos},{venv,tenv,level}) = 
 				let 
-					val {exp,ty} = transExp(venv,tenv) init
+					val {exp,ty} = transExp(venv,tenv,level) init
 					val access = Tr.allocLocal level (!escape)
 				in 
 					{tenv=tenv,
-					venv = S.enter(venv,name,E.VarEntry{ty = ty})}
+					venv = S.enter(venv,name,E.VarEntry{ty = ty}),
+					level = level}
 				end
 		|	transDec (A.VarDec{name,escape,typ=SOME (symbol,pos),init,pos = varpos}, {venv,tenv,level}) =
-				let val {exp,ty} = transExp(venv,tenv) init
+				let val {exp,ty} = transExp(venv,tenv,level) init
 					val ty2 = lookup (tenv,symbol,pos)
 					val access = Tr.allocLocal level (!escape)			
 				in 
 					if ty = ty2
 					then
 					{tenv=tenv,
-					venv = S.enter(venv,name,E.VarEntry{ty = ty})}
+					venv = S.enter(venv,name,E.VarEntry{ty = ty}),level=level}
 					else
 					(ErrorMsg.error pos "Mismatching types"; 
-					{tenv=tenv, venv = S.enter(venv,name,E.VarEntry{ty = ty})})
+					{tenv=tenv, venv = S.enter(venv,name,E.VarEntry{ty = ty}),level=level})
 				end
 		|	transDec (A.TypeDec l,{venv,tenv,level}) = 
 				let
@@ -325,7 +326,8 @@ fun transExp (venv, tenv, level) =
 					val () = app replaceHeaders  l
 				in
 				{venv = venv,
-				tenv = tenv'}
+				tenv = tenv',
+				level =level}
 				end
 		| 	transDec (A.FunctionDec l,{venv,tenv,level}) =
 				let 
@@ -341,10 +343,10 @@ fun transExp (venv, tenv, level) =
 						let 
 							val result_ty = getResultType result
 							val params' = map transparam params
-							val label = Temp.newLabel()
-							fun getBool field = !(#escape field)
+							val label = Temp.newlabel()
+							fun getBool ({name,escape,typ,pos})= !(escape)
 							val formals = (map getBool params)
-							val newLevel = Translate.newLevel{parent=level,name = name, formals = formals}
+							val newLevel = Translate.newLevel{parent=level,name = label, formals = formals}
 					 	in 
 					 		S.enter(venv,name,E.FunEntry{level = newLevel,label = label, formals=map #ty params',result=result_ty})
 						end
@@ -356,13 +358,16 @@ fun transExp (venv, tenv, level) =
 							val params' = map transparam params
 							fun enterparam ({name,ty},venv) = S.enter(venv,name,E.VarEntry{ty=ty})
 							val venv'' = foldl enterparam venv' params' 
-							val bodyType = #ty (transExp(venv'',tenv,level) body)
+							val currentlevel = (case S.look(venv',name) of
+												SOME(E.FunEntry f) => (#level f)
+												| _ => level)
+							val bodyType = #ty (transExp(venv'',tenv,currentlevel) body)
 						in
 						if eqTypes(bodyType,result_ty) then () else (ErrorMsg.error pos "function does not evaluate to correct type")
 						end
 					val () = app processBodies l
 				in 
-					{venv=venv',tenv=tenv}
+					{venv=venv',tenv=tenv,level=level}
 				end
 
 

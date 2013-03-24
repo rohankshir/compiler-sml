@@ -1,7 +1,7 @@
 signature ENV = 
 sig 	
 	type access
-	datatype enventry = VarEntry of {access: Translate.access,ty:Types.ty}
+	datatype enventry = VarEntry of {ty:Types.ty}
 					  | FunEntry of {level: Translate.level, label: Temp.label,formals: Types.ty list, result: Types.ty}
 	val base_tenv : Types.ty Symbol.table (*predefined types*)
 	val base_venv : enventry Symbol.table (*predefined functions*)
@@ -11,8 +11,8 @@ structure Env :> ENV =
 	struct
 
 	open Symbol
-	(*type access = Translate.access*)
-	datatype enventry = VarEntry of {access: Translate.access, ty:Types.ty}
+	type access = Translate.access
+	datatype enventry = VarEntry of {ty:Types.ty}
 					  | FunEntry of {level: Translate.level, label: Temp.label, formals: Types.ty list, result: Types.ty}
 
 	fun base_venv_init () = 
@@ -21,16 +21,16 @@ structure Env :> ENV =
 	in 
 		foldl helper Symbol.empty
 		[
-		(symbol("print"), FunEntry {formals=[Types.STRING], result=Types.UNIT}),
-    	(symbol("flush"), FunEntry {formals=[], result=Types.UNIT}),
-    	(symbol("getchar"), FunEntry {formals=[], result=Types.STRING}),
-    	(symbol("ord"), FunEntry {formals=[Types.STRING], result=Types.INT}),
-    	(symbol("chr"), FunEntry {formals=[Types.INT], result=Types.STRING}),
-    	(symbol("size"), FunEntry {formals=[Types.STRING], result=Types.INT}),
-    	(symbol("substring"), FunEntry {formals=[Types.STRING,Types.INT,Types.INT], result=Types.STRING}),
-    	(symbol("concat"), FunEntry {formals=[Types.STRING,Types.STRING], result=Types.STRING}),
-    	(symbol("not"), FunEntry {formals=[Types.INT], result=Types.INT}),
-    	(symbol("exit"), FunEntry {formals=[Types.INT], result=Types.UNIT})
+		(symbol("print"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING], result=Types.UNIT}),
+    	(symbol("flush"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[], result=Types.UNIT}),
+    	(symbol("getchar"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[], result=Types.STRING}),
+    	(symbol("ord"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING], result=Types.INT}),
+    	(symbol("chr"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.INT], result=Types.STRING}),
+    	(symbol("size"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING], result=Types.INT}),
+    	(symbol("substring"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING,Types.INT,Types.INT], result=Types.STRING}),
+    	(symbol("concat"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING,Types.STRING], result=Types.STRING}),
+    	(symbol("not"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.INT], result=Types.INT}),
+    	(symbol("exit"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.INT], result=Types.UNIT})
   		]
 	end
 
