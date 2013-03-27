@@ -65,9 +65,9 @@ fun eqTypeList ([],[]) = true
 				    
 fun transExp (venv, tenv, level) = 
 	let fun trexp (A.VarExp v) = trvar v 									(* VarExp *)
-			| 	trexp (A.NilExp) = {exp = Tr.nilExp(), ty = Types.NIL}				(* NilExp *)
-			| 	trexp (A.IntExp i) = {exp=(Tr.intLiteral(i)),ty=Types.INT}					(* IntExp *)
-        	|	trexp (A.StringExp (s,pos)) = {exp=(Tr.stringLiteral(s)),ty=Types.STRING}		(* StringExp *)
+			| 	trexp (A.NilExp) = 						{exp = Tr.nilExp(), ty = Types.NIL}				(* NilExp *)
+			| 	trexp (A.IntExp i) = 					{exp=(Tr.intLiteral(i)),ty=Types.INT}					(* IntExp *)
+        	|	trexp (A.StringExp (s,pos)) = 			{exp=(Tr.stringLiteral(s)),ty=Types.STRING}		(* StringExp *)
         	|	trexp (A.CallExp {func, args, pos}) = 						(* CallExp *)
         		(case Symbol.look(venv,func) of 
         				SOME (E.FunEntry {level,label,formals, result}) => 

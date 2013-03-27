@@ -15,9 +15,14 @@ sig
  	val unNx : exp -> Tree.stm
  	val unCx : exp -> (Temp.label * Temp.label -> Tree.stm)
 
+  val intLiteral : int -> exp
+  val stringLiteral : string -> exp
+
  	val nilExp : unit -> exp
- 	val intLiteral : int -> exp
- 	val stringLiteral : string -> exp
+  val callExp : Temp.label * level * level * exp list -> exp
+
+
+
 	val procEntryExit: {level: level, body: exp} -> unit
  	val getResult : unit -> frag list
 
@@ -105,6 +110,16 @@ struct
    			frags := Frame.STRING(label, str)::(!frags);
    			Ex (T.NAME label)
    		end
+
+ fun callExp (label, currlevel, calllevel, args) = 
+    case calllevel of 
+      Level {unique, frame, parent = parent as Level _ } => Ex (T.CALL (T.NAME label, ))
+      (*FINISH THIS***)
+
+
+
+
+
 
 
 	fun procEntryExit {level=Level {unique, frame, parent}, body} =

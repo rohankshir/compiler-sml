@@ -10,7 +10,14 @@ struct
   datatype frag = PROC of {body: Tree.stm, frame: frame}
                   | STRING of Temp.label * string
   val wordsize = 4
+  
+  structure T = Tree
 
+  val FP = Temp.newtemp()
+
+  fun exp (InFrame i) (T.TEMP(FP)) = 
+      T.MEM(T.BINOP(T.PLUS, T.TEMP(FP),T.CONST(i)))
+      | exp (InReg r) (T.TEMP(FP)) = T.TEMP(r)
 
   fun allocFormal (esc, (accs,frameOffset)) =
           (* if formal escapes, add InFrame to access list and push frameOffset down *)

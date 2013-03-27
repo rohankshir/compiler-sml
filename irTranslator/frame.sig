@@ -5,7 +5,7 @@ sig type frame
     val name : frame -> Temp.label
     val formals : frame -> access list  
     val allocLocal : frame -> bool -> access
-
+    val exp : access -> Tree.exp -> Tree.exp
 
 
     datatype frag = PROC of {body: Tree.stm, frame: frame}
