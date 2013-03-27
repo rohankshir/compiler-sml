@@ -17,6 +17,8 @@ struct
 
   fun exp (InFrame i) (T.TEMP(FP)) = 
       T.MEM(T.BINOP(T.PLUS, T.TEMP(FP),T.CONST(i)))
+      | exp (InFrame i) (e) = 
+      T.MEM(T.BINOP(T.PLUS, e,T.CONST(i)))
       | exp (InReg r) (T.TEMP(FP)) = T.TEMP(r)
 
   fun allocFormal (esc, (accs,frameOffset)) =

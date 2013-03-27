@@ -17,9 +17,9 @@ sig
 
   val intLiteral : int -> exp
   val stringLiteral : string -> exp
-
+  val simpleVar: access * level -> exp
  	val nilExp : unit -> exp
-  val callExp : Temp.label * level * level * exp list -> exp
+  (*val callExp : Temp.label * level * level * exp list -> exp *)
 
 
 
@@ -49,6 +49,22 @@ struct
 	val frags = ref [] : frag list ref (* Init frag list to empty list *)
 
 
+
+  fun eqLevel(Level {unique=unique1 ,frame =_ , parent = _} , Level {unique= unique2,frame =_ , parent = _}) = (unique1 = unique2)
+     | eqLevel(Top,Top) = true
+     | eqLevel(_,_) = false
+
+  fun convStaticLink (parent, child) = 
+    let
+      fun helper (lev as Level {unique = u,frame = f ,parent = parentLevel},exp) = 
+        if (eqLevel(lev,parent))
+        then exp
+        else helper(parentLevel, Frame.exp(hd(Frame.formals f)) (exp))
+    in helper(child,T.TEMP(Frame.FP))
+    end
+
+   fun simpleVar ((parentLevel,access):access, currentLevel) =
+    Ex(Frame.exp (access) (convStaticLink(parentLevel,currentLevel)))
 
 
 
@@ -111,12 +127,12 @@ struct
    			Ex (T.NAME label)
    		end
 
- fun callExp (label, currlevel, calllevel, args) = 
+ (*fun callExp (label, currlevel, calllevel, args) = 
     case calllevel of 
       Level {unique, frame, parent = parent as Level _ } => Ex (T.CALL (T.NAME label, ))
       (*FINISH THIS***)
 
-
+*)
 
 
 
