@@ -26,12 +26,8 @@ sig
   val subscriptVar: exp * exp -> exp
   val fieldVar: exp * int -> exp
 
-
-
 	val procEntryExit: {level: level, body: exp} -> unit
  	val getResult : unit -> frag list
-
-
 
 
 
@@ -129,11 +125,11 @@ struct
           T.MEM(T.TEMP(Temp.newtemp()))))
     end
 
-  fun fieldVar (var, offset) =
+  fun fieldVar (varexp, offset) =
     let 
-      val varexp = unEx var
+      val var = unEx varexp
     in
-      Ex(T.MEM(T.BINOP(T.PLUS, varexp, 
+      Ex(T.MEM(T.BINOP(T.PLUS, var, 
          T.BINOP(T.MUL, T.CONST(offset), 
           T.CONST(Frame.wordsize)))))
     end

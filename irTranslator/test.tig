@@ -1,1 +1,5 @@
-"hello"
+let type a = {name:string, number:int, color:string}
+var b := a{name = "rohan", number = 1, color="brown" }
+in 
+b.name
+end

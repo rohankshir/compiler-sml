@@ -254,15 +254,17 @@ fun transExp (venv, tenv, level) =
             (case trvar var
               of {exp,ty=Types.RECORD(fields,_)} =>
                 (let 
-                    fun idfinder (symid,_) = (symid = id)
+                	val counter = ref 0
+                    fun idfinder (symid,_) = ((counter := !counter + 1) ;(symid = id))
                 in
                     (case (List.find idfinder fields)
-                        of SOME(_,ty) => {exp=(Tr.nilExp()),ty=actual_ty ty}
+                        of SOME(_,ty) => {exp=(Tr.fieldVar(exp,!counter)),ty=actual_ty ty}
                          | NONE       => (ErrorMsg.error pos ("record does not have this field" ^ Symbol.name id);
                                     {exp=(Tr.nilExp()),ty=Types.BOTTOM}))
                     end)
                | {exp,ty} => (ErrorMsg.error pos "not a record type";
                               {exp=(Tr.nilExp()), ty=Types.BOTTOM}))
+            
 
             (***** SUBSCRIPT VAR *****)
             | trvar (A.SubscriptVar(var, sub, pos)) =
@@ -391,7 +393,7 @@ fun transExp (venv, tenv, level) =
 
 fun transProg ast = 
 	let 
-		val {exp=result,ty=_} = transExp (E.base_venv,E.base_tenv, Translate.outermost) ast
+		val {exp=result,ty=_} = transExp (E.base_venv,E.base_tenv, Tr.newLevel{parent = Translate.outermost, name = Temp.newlabel(), formals=[]} ) ast
 	in 
 		Tr.unNx(result)
 	end
