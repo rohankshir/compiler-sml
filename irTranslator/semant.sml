@@ -149,7 +149,7 @@ fun transExp (venv, tenv, level) =
         									
         	| trexp (A.SeqExp l) = 											(* SeqExp *)
         		let
-        			fun seqHelper [(exp,pos)] = trexp exp
+        			fun seqHelper	[(exp,pos)] = trexp exp
         				| seqHelper ((exp,pos)::tail) = (trexp exp; seqHelper tail)
         		in 
         			seqHelper l
@@ -239,14 +239,17 @@ fun transExp (venv, tenv, level) =
                				| _ => (ErrorMsg.error pos (S.name typ ^" is not of array type"); {exp = (Tr.nilExp()), ty = Types.BOTTOM})   			
            	 end
            	 
-			
+			(***** SIMPLE VAR *****)
 			and trvar (A.SimpleVar(id,pos)) = 
 			(case Symbol.look(venv, id)
 				of SOME(E.VarEntry{access, ty}) => 
-					{exp = (Tr.nilExp()), ty=actual_ty ty}
-					| NONE => (ErrorMsg.error pos ("undefined variable " ^ Symbol.name id);
-									{exp = (Tr.nilExp()), ty = Types.BOTTOM}))
+					{exp = (Tr.simpleVar(access, level)), ty=actual_ty ty}
+					| SOME(E.FunEntry _) => ((ErrorMsg.error pos "var name is bound to function");
+									{exp = Tr.ERROR, ty = Types.BOTTOM})
+					| NONE => ((ErrorMsg.error pos ("undefined variable " ^ Symbol.name id));
+									{exp = Tr.ERROR, ty = Types.BOTTOM}))
 
+			(***** FIELD VAR *****)
             | trvar (A.FieldVar(var,id,pos)) = 
             (case trvar var
               of {exp,ty=Types.RECORD(fields,_)} =>
@@ -261,14 +264,21 @@ fun transExp (venv, tenv, level) =
                | {exp,ty} => (ErrorMsg.error pos "not a record type";
                               {exp=(Tr.nilExp()), ty=Types.BOTTOM}))
 
-            | trvar (A.SubscriptVar(var, exp, pos)) =
-                (checkInt((trexp exp), pos);
-                (case (#ty (trvar var)) of 
-                Types.ARRAY(ty, _) => 
-                    {exp=(Tr.nilExp()), ty=actual_ty ty}
-                | Types.BOTTOM => {exp = (Tr.nilExp()), ty = Types.BOTTOM}
-                | _ => (ErrorMsg.error pos ("not an array type");
-                    {exp=(Tr.nilExp()), ty=Types.BOTTOM})))
+            (***** SUBSCRIPT VAR *****)
+            | trvar (A.SubscriptVar(var, sub, pos)) =
+            	let
+            		val () = checkInt((trexp sub), pos)
+            		val subexp = #exp (trexp sub)
+            		val varexp = #exp (trvar var)
+            		val varty = #ty (trvar var)
+            	in 
+                	(case (varty) 
+                		of Types.ARRAY(ty, _) => {exp = Tr.subscriptVar(varexp, subexp), ty = actual_ty ty}
+                		| Types.BOTTOM => {exp = Tr.nilExp(), ty = Types.BOTTOM}
+                		| _ => (ErrorMsg.error pos ("not an array type"); {exp=Tr.nilExp(), ty=Types.BOTTOM})
+                		)
+				end
+			
 			in 
 				trexp 
 			end

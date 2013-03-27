@@ -6,6 +6,8 @@ sig
 	type breakpoint
 	type frag
 
+  val ERROR : exp
+
 	val outermost : level
 	val newLevel : {parent: level, name: Temp.label, formals: bool list} -> level
 	val formals : level -> access list
@@ -17,9 +19,12 @@ sig
 
   val intLiteral : int -> exp
   val stringLiteral : string -> exp
-  val simpleVar: access * level -> exp
  	val nilExp : unit -> exp
   (*val callExp : Temp.label * level * level * exp list -> exp *)
+
+  val simpleVar: access * level -> exp
+  val subscriptVar: exp * exp -> exp
+  val fieldVar: exp * int -> exp
 
 
 
@@ -44,12 +49,12 @@ struct
 	datatype level = Top | Level of {unique: unit ref, frame: Frame.frame, parent: level}
 	type access = level * Frame.access
 	type breakpoint = Temp.label
-	val outermost = Top
-	type frag = Frame.frag
+  type frag = Frame.frag
 	val frags = ref [] : frag list ref (* Init frag list to empty list *)
+  val outermost = Top
+  val ERROR = Ex (T.CONST 9999)
 
-
-
+  (* HELPERS *)
   fun eqLevel(Level {unique=unique1 ,frame =_ , parent = _} , Level {unique= unique2,frame =_ , parent = _}) = (unique1 = unique2)
      | eqLevel(Top,Top) = true
      | eqLevel(_,_) = false
@@ -63,31 +68,24 @@ struct
     in helper(child,T.TEMP(Frame.FP))
     end
 
-   fun simpleVar ((parentLevel,access):access, currentLevel) =
-    Ex(Frame.exp (access) (convStaticLink(parentLevel,currentLevel)))
-
-
-
-
+  (* STUFF *)
 	fun newLevel {parent, name, formals} = Level {unique = ref (), 
 												  frame = Frame.newFrame {name=name, formals = true::formals},
 												  parent = parent}
-	fun   formals (Top) = []
+	fun  formals (Top) = []
 		| formals (lev as Level{unique,frame,parent}) = 
 			(case Frame.formals(frame) 
 				of [] => (ErrorMsg.impossible "No Static Link?")
 				| head::formals => map (fn accs => (lev,accs)) formals)
 
-	 fun  allocLocal Top escape = ErrorMsg.impossible "Local variable cannot be allocated in this scope"
+  fun  allocLocal Top escape = ErrorMsg.impossible "Local variable cannot be allocated in this scope"
     	| allocLocal (lev as Level{unique, frame, parent}) escape = (lev,Frame.allocLocal frame escape)
-
-
 
   fun seq [] = T.EXP (T.CONST 0)
     | seq [s] = s
     | seq (h::l) = T.SEQ(h,seq l)
 
-
+  (* EXP -> Tree exp/stm *)
   fun unEx (Ex e) = e
     | unEx (Cx genstm) =
         let val r = Temp.newtemp ()
@@ -115,8 +113,37 @@ struct
     | unCx (Cx c) = c
 
 
+  (* VARIABLES *)
+  fun simpleVar ((parentLevel,access):access, currentLevel) =
+    Ex(Frame.exp (access) (convStaticLink(parentLevel,currentLevel)))
+
+  fun subscriptVar (varexp, subexp) = 
+    let
+      val var = unEx varexp
+      val sub = unEx subexp
+    in
+        Ex(T.ESEQ(T.MOVE(T.TEMP(Temp.newtemp()),
+          T.BINOP(T.PLUS,var,
+          T.BINOP(T.MUL,sub,
+          T.CONST(Frame.wordsize)))),
+          T.MEM(T.TEMP(Temp.newtemp()))))
+    end
+
+  fun fieldVar (var, offset) =
+    let 
+      val varexp = unEx var
+    in
+      Ex(T.MEM(T.BINOP(T.PLUS, varexp, 
+         T.BINOP(T.MUL, T.CONST(offset), 
+          T.CONST(Frame.wordsize)))))
+    end
+
+
+  (* EXPRESSIONS *)
    fun nilExp () = Ex (T.CONST (0)) 
 
+
+   (* LITERALS *)
    fun intLiteral n = Ex (T.CONST n)
 
    fun stringLiteral str = 
