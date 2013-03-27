@@ -7,10 +7,12 @@ struct
                 numLocals: int ref, 
                 frameOffset: int ref
                 }
+  datatype frag = PROC of {body: Tree.stm, frame: frame}
+                  | STRING of Temp.label * string
   val wordsize = 4
 
 
- fun allocFormal (esc, (accs,frameOffset)) =
+  fun allocFormal (esc, (accs,frameOffset)) =
           (* if formal escapes, add InFrame to access list and push frameOffset down *)
           (case esc of true => (InFrame(frameOffset - wordsize)::accs, frameOffset - wordsize)
           (* otherwise, add InReg to access list and frameOffset stays same *)
@@ -24,9 +26,9 @@ struct
      end     
   
   fun name(f:frame) = #name f
+
   fun formals (f:frame) = #formals f
   
-
   fun allocLocal (f:frame) b = 
     (case b of true =>
             (((#numLocals f):= !(#numLocals f)+ 1);
@@ -36,4 +38,5 @@ struct
             (((#numLocals f):= !(#numLocals f)+ 1);
             InReg(Temp.newtemp())))
 
+  fun procEntryExit1 (frame, stm) = stm
 end
