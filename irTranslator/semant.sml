@@ -148,11 +148,13 @@ fun transExp (venv, tenv, level, break) =
 
         									
         	| trexp (A.SeqExp l) = 											(* SeqExp *)
-        		let
-        			fun seqHelper	[(exp,pos)] = trexp exp
-        				| seqHelper ((exp,pos)::tail) = (trexp exp; seqHelper tail)
+        		let 
+        			val tail_exp = #1(hd(rev(l)))
+        			val tail_ty = #ty (trexp tail_exp)
+        			fun helper (exp, pos) = (#exp (trexp exp))
+        			val explist = map helper l
         		in 
-        			seqHelper l
+        			{exp = Tr.seqExp(explist), ty = tail_ty} 
         		end
 
         	| trexp (A.AssignExp {var,exp,pos} ) =							(* AssignExp *)
@@ -222,11 +224,11 @@ fun transExp (venv, tenv, level, break) =
 
         	| trexp (A.LetExp{decs, body, pos}) = 							(* LetExp *)
         		let 
-        			val {venv = venv', tenv = tenv',level = level, break = break} = transDecs(venv,tenv,level,break,decs)
+        			val {venv = venv', tenv = tenv',level = level, break = break, explist=explist} = transDecs(venv,tenv,level,break,decs)
+        			val body' = transExp(venv',tenv',level, break) body
         		in 
-        			transExp(venv',tenv',level, break) body
+        			{exp = Tr.letExp(explist, #exp body'), ty = #ty body'}
         		end
-        	
             
 
         	| trexp (A.ArrayExp {typ, size, init, pos})=					(* ArrayExp *)
@@ -304,31 +306,34 @@ fun transExp (venv, tenv, level, break) =
 			| transTy (tenv, A.ArrayTy(s,pos)) = Types.ARRAY(lookup(tenv,s,pos),ref ())
 
 
-		and transDecs (venv,tenv,level,break,l) = foldl transDec {venv=venv,tenv=tenv, level=level, break = break} l
+		and transDecs (venv,tenv,level,break,l) = 
+		foldl transDec {venv=venv,tenv=tenv, level=level, break = break, explist = []:Tr.exp list} l
 
-		and transDec (A.VarDec{name,escape,typ=NONE,init,pos},{venv,tenv,level,break}) = 
+		and transDec (A.VarDec{name,escape,typ=NONE,init,pos},{venv,tenv,level,break, explist}) = 
 				let 
 					val {exp,ty} = transExp(venv,tenv,level,break) init
 					val access = Tr.allocLocal level (!escape)
+					val explist = rev((Tr.assignExp(Tr.simpleVar(access,level),exp))::rev(explist))	
 				in 
 					{tenv=tenv,
 					venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),
-					level = level, break = break}
+					level = level, break = break, explist = explist}
 				end
-		|	transDec (A.VarDec{name,escape,typ=SOME (symbol,pos),init,pos = varpos}, {venv,tenv,level,break}) =
+		|	transDec (A.VarDec{name,escape,typ=SOME (symbol,pos),init,pos = varpos}, {venv,tenv,level,break,explist}) =
 				let val {exp,ty} = transExp(venv,tenv,level,break) init
 					val ty2 = lookup (tenv,symbol,pos)
-					val access = Tr.allocLocal level (!escape)			
+					val access = Tr.allocLocal level (!escape)
+					val explist = rev((Tr.assignExp(Tr.simpleVar(access,level),exp))::rev(explist))		
 				in 
 					if ty = ty2
 					then
 					{tenv=tenv,
-					venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),level=level, break=break}
+					venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),level=level, break=break, explist=explist}
 					else
 					(ErrorMsg.error pos "Mismatching types"; 
-					{tenv=tenv, venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),level=level,break=break })
+					{tenv=tenv, venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),level=level,break=break, explist = explist})
 				end
-		|	transDec (A.TypeDec l,{venv,tenv,level,break}) = 
+		|	transDec (A.TypeDec l,{venv,tenv,level,break, explist}) = 
 				let
 					fun addEmptyHeader (name,tenv) = (S.enter (tenv,name,Types.NAME(name,ref NONE)))
 					val names = (map #name l)
@@ -342,10 +347,10 @@ fun transExp (venv, tenv, level, break) =
 				{venv = venv,
 				tenv = tenv',
 				level =level,
-				break = break 
-				}
+				break = break, 
+				explist = explist}
 				end
-		| 	transDec (A.FunctionDec l,{venv,tenv,level, break}) =
+		| 	transDec (A.FunctionDec l,{venv,tenv,level, break, explist}) =
 				let 
 					fun getResultType (SOME(rt,pos)) = (case S.look(tenv,rt) of 
 														SOME(t)=> t
@@ -390,7 +395,7 @@ fun transExp (venv, tenv, level, break) =
 						end
 					val () = app processBodies l
 				in 
-					{venv=venv',tenv=tenv,level=level, break = break}
+					{venv=venv',tenv=tenv,level=level, break = break, explist = explist}
 				end
 
 
