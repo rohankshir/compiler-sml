@@ -87,7 +87,7 @@ struct
   let fun helper (a::l,n,result) = helper(l,n+1,(a,n)::result)
       | helper ([], n, result) = result
   in 
-    helper(l,0,[])
+    rev(helper(l,0,[]))
   end
   fun eqLevel(Level {unique=unique1 ,frame =_ , parent = _} , Level {unique= unique2,frame =_ , parent = _}) = (unique1 = unique2)
      | eqLevel(Top,Top) = true
@@ -263,7 +263,22 @@ struct
   fun stringle (exp1 , exp2) =  relopCxHelper(T.LE,exp1,exp2)
   fun stringge (exp1 , exp2) =  relopCxHelper(T.GE,exp1,exp2)
 
-  fun ifExp (exp1,exp2,exp3) = exp1
+
+(* make this better *)
+  fun ifExp (exp1,exp2,exp3) = 
+  let
+    val r = Temp.newtemp()
+    val t = Temp.newlabel()
+    val f = Temp.newlabel()
+    val join = Temp.newlabel()
+    fun allocExp (e,label) = seq([T.LABEL(label),T.MOVE(T.TEMP(r),e),T.JUMP(T.NAME(join),[join])])
+    val e1 = unCx exp1
+    val e2 = allocExp(unEx exp2 , t)
+    val e3 = allocExp(unEx exp3 , f)
+    val cjmp = e1 (t,f)
+  in
+    Nx(seq([cjmp,e2,e3]))
+  end
 
 
   fun recordExp l = 
