@@ -63,7 +63,7 @@ fun eqTypeList ([],[]) = true
 
 
 				    
-fun transExp (venv, tenv, level) = 
+fun transExp (venv, tenv, level, break) = 
 	let fun trexp (A.VarExp v) = trvar v 									(* VarExp *)
 			| 	trexp (A.NilExp) = 						{exp = Tr.nilExp(), ty = Types.NIL}				(* NilExp *)
 			| 	trexp (A.IntExp i) = 					{exp=(Tr.intLiteral(i)),ty=Types.INT}					(* IntExp *)
@@ -171,20 +171,22 @@ fun transExp (venv, tenv, level) =
 
         									
         	| trexp (A.SeqExp l) = 											(* SeqExp *)
-        		let
-        			fun seqHelper	[(exp,pos)] = trexp exp
-        				| seqHelper ((exp,pos)::tail) = (trexp exp; seqHelper tail)
+        		let 
+        			val tail_exp = #1(hd(rev(l)))
+        			val tail_ty = #ty (trexp tail_exp)
+        			fun helper (exp, pos) = (#exp (trexp exp))
+        			val explist = map helper l
         		in 
-        			seqHelper l
+        			{exp = Tr.seqExp(explist), ty = tail_ty} 
         		end
 
         	| trexp (A.AssignExp {var,exp,pos} ) =							(* AssignExp *)
         		let
-        			val var_ty = #ty (trvar (var))
-        			val exp_ty = #ty (trexp (exp))
+        			val {exp = left, ty = left_ty} = (trvar (var))
+        			val {exp = right, ty = right_ty} = (trvar (var))
         		in 
-        			if (eqTypes(var_ty,exp_ty))
-        			then {exp = (Tr.nilExp()), ty = Types.UNIT}
+        			if (eqTypes(left_ty,right_ty))
+        			then {exp = (Tr.assignExp(left,right)), ty = Types.UNIT}
         			else (ErrorMsg.error pos "type mismatch in var assignment";{exp = (Tr.nilExp()), ty = Types.BOTTOM})
         		end
 
@@ -211,40 +213,46 @@ fun transExp (venv, tenv, level) =
 
 
         	| trexp (A.WhileExp {test,body,pos}) = 							(* WhileExp *)
-        		(checkInt (trexp test,pos);
-        		 nestLevel := !nestLevel + 1;
-        		 checkUnit (trexp body,pos);
-        		 nestLevel := !nestLevel - 1;	
-        		 {exp=(Tr.nilExp()),ty=Types.UNIT})
+        		let
+        			val () = nestLevel := !nestLevel + 1;
+        			val body' = transExp (venv, tenv, level, break) body
+        			val test' = transExp (venv, tenv, level, break) test
+        			val () = nestLevel := !nestLevel - 1;
+        		in 
+        			(checkInt(test',pos);
+        			checkUnit(body',pos);
+        			{exp = Tr.whileExp(#exp test', #exp body', break), ty = Types.UNIT})
+        		end
 
         	| trexp (A.ForExp {var, escape, lo, hi, body, pos}) = 			(* ForExp *)
         		let 
 
         			val access = Tr.allocLocal level (!escape)
+        			val breakPt = Tr.newBreakPt()
         			val () = checkInt (trexp lo,pos)
         			val () = checkInt (trexp hi,pos)
         			val venv' = S.enter(venv,var,E.VarEntry{access = access, ty = Types.INT})
         			val () = (nestLevel := !nestLevel + 1)
-        			val {exp,ty} = transExp (venv',tenv,level) body
+        			val {exp = bodyexp,ty} = transExp (venv',tenv,level,break) body
         			val () = (nestLevel := !nestLevel - 1)
-        			val () = checkUnit ({exp=exp,ty=ty},pos)
+        			val () = checkUnit ({exp=bodyexp,ty=ty},pos)
         		in
-        			{exp=(Tr.nilExp()),ty=ty}
+        			{exp=(Tr.forExp(Tr.simpleVar(access, level),(#exp (trexp lo)), (#exp (trexp hi)), bodyexp, breakPt)),ty=ty}
         		end
 
         	| trexp (A.BreakExp(pos)) = 									(* BreakExp *)
         		if (!nestLevel <> 0)
-        		then {exp=(Tr.nilExp()),ty = Types.UNIT}
+        		then {exp=(Tr.breakExp(break)),ty = Types.UNIT}
         		else (ErrorMsg.error pos "Break must be within a loop"; {exp=(Tr.nilExp()),ty = Types.BOTTOM})
 
 
         	| trexp (A.LetExp{decs, body, pos}) = 							(* LetExp *)
         		let 
-        			val {venv = venv', tenv = tenv',level = level} = transDecs(venv,tenv,level,decs)
+        			val {venv = venv', tenv = tenv',level = level, break = break, explist=explist} = transDecs(venv,tenv,level,break,decs)
+        			val body' = transExp(venv',tenv',level, break) body
         		in 
-        			transExp(venv',tenv',level) body
+        			{exp = Tr.letExp(explist, #exp body'), ty = #ty body'}
         		end
-        	
             
 
         	| trexp (A.ArrayExp {typ, size, init, pos})=					(* ArrayExp *)
@@ -290,7 +298,6 @@ fun transExp (venv, tenv, level) =
                | {exp,ty} => (ErrorMsg.error pos "not a record type";
                               {exp=(Tr.nilExp()), ty=Types.BOTTOM}))
             
-
             (***** SUBSCRIPT VAR *****)
             | trvar (A.SubscriptVar(var, sub, pos)) =
             	let
@@ -324,31 +331,34 @@ fun transExp (venv, tenv, level) =
 			| transTy (tenv, A.ArrayTy(s,pos)) = Types.ARRAY(lookup(tenv,s,pos),ref ())
 
 
-		and transDecs (venv,tenv,level,l) = foldl transDec {venv=venv,tenv=tenv, level=level} l
+		and transDecs (venv,tenv,level,break,l) = 
+		foldl transDec {venv=venv,tenv=tenv, level=level, break = break, explist = []:Tr.exp list} l
 
-		and transDec (A.VarDec{name,escape,typ=NONE,init,pos},{venv,tenv,level}) = 
+		and transDec (A.VarDec{name,escape,typ=NONE,init,pos},{venv,tenv,level,break, explist}) = 
 				let 
-					val {exp,ty} = transExp(venv,tenv,level) init
+					val {exp,ty} = transExp(venv,tenv,level,break) init
 					val access = Tr.allocLocal level (!escape)
+					val explist = rev((Tr.assignExp(Tr.simpleVar(access,level),exp))::rev(explist))	
 				in 
 					{tenv=tenv,
 					venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),
-					level = level}
+					level = level, break = break, explist = explist}
 				end
-		|	transDec (A.VarDec{name,escape,typ=SOME (symbol,pos),init,pos = varpos}, {venv,tenv,level}) =
-				let val {exp,ty} = transExp(venv,tenv,level) init
+		|	transDec (A.VarDec{name,escape,typ=SOME (symbol,pos),init,pos = varpos}, {venv,tenv,level,break,explist}) =
+				let val {exp,ty} = transExp(venv,tenv,level,break) init
 					val ty2 = lookup (tenv,symbol,pos)
-					val access = Tr.allocLocal level (!escape)			
+					val access = Tr.allocLocal level (!escape)
+					val explist = rev((Tr.assignExp(Tr.simpleVar(access,level),exp))::rev(explist))		
 				in 
 					if ty = ty2
 					then
 					{tenv=tenv,
-					venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),level=level}
+					venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),level=level, break=break, explist=explist}
 					else
 					(ErrorMsg.error pos "Mismatching types"; 
-					{tenv=tenv, venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),level=level})
+					{tenv=tenv, venv = S.enter(venv,name,E.VarEntry{access = access, ty = ty}),level=level,break=break, explist = explist})
 				end
-		|	transDec (A.TypeDec l,{venv,tenv,level}) = 
+		|	transDec (A.TypeDec l,{venv,tenv,level,break, explist}) = 
 				let
 					fun addEmptyHeader (name,tenv) = (S.enter (tenv,name,Types.NAME(name,ref NONE)))
 					val names = (map #name l)
@@ -361,9 +371,11 @@ fun transExp (venv, tenv, level) =
 				in
 				{venv = venv,
 				tenv = tenv',
-				level =level}
+				level =level,
+				break = break, 
+				explist = explist}
 				end
-		| 	transDec (A.FunctionDec l,{venv,tenv,level}) =
+		| 	transDec (A.FunctionDec l,{venv,tenv,level, break, explist}) =
 				let 
 					fun getResultType (SOME(rt,pos)) = (case S.look(tenv,rt) of 
 														SOME(t)=> t
@@ -402,13 +414,13 @@ fun transExp (venv, tenv, level) =
 												SOME(E.FunEntry f) => (#level f)
 												| _ => level)
 						
-							val bodyType = #ty (transExp(venv'',tenv,currentlevel) body)
+							val bodyType = #ty (transExp(venv'',tenv,currentlevel,break) body)
 						in
 						if eqTypes(bodyType,result_ty) then () else (ErrorMsg.error pos "function does not evaluate to correct type")
 						end
 					val () = app processBodies l
 				in 
-					{venv=venv',tenv=tenv,level=level}
+					{venv=venv',tenv=tenv,level=level, break = break, explist = explist}
 				end
 
 
@@ -418,7 +430,8 @@ fun transExp (venv, tenv, level) =
 
 fun transProg ast = 
 	let 
-		val {exp=result,ty=_} = transExp (E.base_venv,E.base_tenv, Tr.newLevel{parent = Translate.outermost, name = Temp.newlabel(), formals=[]} ) ast
+		val startLevel = Tr.newLevel{parent = Translate.outermost, name = Temp.newlabel(), formals=[]}
+		val {exp=result,ty=_} = transExp (E.base_venv,E.base_tenv, startLevel, Temp.newlabel()) ast
 	in 
 		Tr.unNx(result)
 	end

@@ -45,6 +45,13 @@ sig
   val recordExp: exp list -> exp
   val arrayExp: exp * exp -> exp
   val ifExp: exp * exp * exp -> exp
+  val whileExp : exp * exp * breakpoint -> exp
+  val forExp : exp * exp * exp * exp * breakpoint -> exp
+  val breakExp : breakpoint -> exp
+  val assignExp : exp * exp -> exp
+  val seqExp : exp list -> exp
+  val letExp : exp list * exp -> exp
+
   (*val callExp : Temp.label * level * level * exp list -> exp *)
 
   val simpleVar: access * level -> exp
@@ -54,7 +61,7 @@ sig
 	val procEntryExit: {level: level, body: exp} -> unit
  	val getResult : unit -> frag list
 
-
+  val newBreakPt : unit -> breakpoint
 
 end 
 
@@ -110,6 +117,8 @@ struct
   fun seq [] = T.EXP (T.CONST 0)
     | seq [s] = s
     | seq (h::l) = T.SEQ(h,seq l)
+
+  val newBreakPt = Temp.newlabel
 
   (* EXP -> Tree exp/stm *)
   fun unEx (Ex e) = e
@@ -171,7 +180,56 @@ struct
     Cx s1
   end 
   (* EXPRESSIONS *)
-   fun nilExp () = Ex (T.CONST (0)) 
+  fun nilExp () = Ex (T.CONST (0)) 
+
+  fun whileExp (condexp, bodyexp, doneLabel) =
+      let
+        val condLabel = Temp.newlabel()
+        val cond = unCx condexp
+        val bodyLabel = Temp.newlabel()
+        val body = unNx bodyexp
+      in
+        Nx (seq [T.LABEL condLabel,
+                 cond(bodyLabel,doneLabel), 
+                 T.LABEL bodyLabel,
+                 body,
+                 T.JUMP (T.NAME condLabel, [condLabel]),
+                 T.LABEL doneLabel])
+      end
+
+  fun forExp (varexp, loexp, hiexp, bodyexp, breakLabel) =
+      let
+        val bodyLabel = Temp.newlabel ()
+        val incrLabel = Temp.newlabel ()
+        val var = unEx varexp
+        val lo = unEx loexp
+        val hi = unEx hiexp
+        val body = unNx bodyexp
+      in
+        Nx (seq [T.MOVE (var, lo),
+                 T.CJUMP (T.LE, var, hi, bodyLabel, breakLabel),
+                 T.LABEL bodyLabel,
+                 body,
+                 T.CJUMP (T.LT, var, hi, incrLabel, breakLabel),
+                 T.LABEL incrLabel,
+                 T.MOVE (var, T.BINOP (T.PLUS, var, T.CONST (1))),
+                 T.JUMP (T.NAME bodyLabel, [bodyLabel]),
+                 T.LABEL breakLabel])
+      end
+
+  fun breakExp breakLabel = 
+    Nx (T.JUMP (T.NAME breakLabel, [breakLabel]))
+
+  fun assignExp (leftexp, rightexp) = 
+    Nx (T.MOVE (unEx leftexp, unEx rightexp))
+
+  fun seqExp [] = Ex (T.CONST (0))
+    | seqExp [e] = e
+    | seqExp (e :: l) =
+        Ex(T.ESEQ(unNx e, unEx (seqExp l)))
+
+  fun letExp (decsexp, bodyexp) = seqExp(rev(bodyexp::rev(decsexp)))
+
 
 
    (* LITERALS *)
