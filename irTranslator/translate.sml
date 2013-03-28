@@ -19,6 +19,21 @@ sig
 
   val intLiteral : int -> exp
   val stringLiteral : string -> exp
+
+  (* dem binops,  dho *)
+  val add: exp * exp -> exp
+  val minus: exp * exp -> exp
+  val mult: exp * exp -> exp
+  val divide: exp * exp -> exp
+  val eq:  exp * exp -> exp
+  val neq:  exp * exp -> exp
+  val lt:  exp * exp -> exp
+  val gt:  exp * exp -> exp
+  val le:  exp * exp -> exp
+  val ge:  exp * exp -> exp
+
+
+
  	val nilExp : unit -> exp
   val recordExp: exp list -> exp
   val arrayExp: exp * exp -> exp
@@ -141,7 +156,12 @@ struct
           T.CONST(Frame.wordsize)))))
     end
 
-
+  fun relopCxHelper (relop,exp1,exp2) =  
+  let 
+    fun s1(t,f) = T.CJUMP(relop,unEx exp1, unEx exp2,t,f)
+  in 
+    Cx s1
+  end 
   (* EXPRESSIONS *)
    fun nilExp () = Ex (T.CONST (0)) 
 
@@ -156,6 +176,21 @@ struct
    			frags := Frame.STRING(label, str)::(!frags);
    			Ex (T.NAME label)
    		end
+
+  fun add (exp1 , exp2) =  Ex (T.BINOP(T.PLUS,unEx exp1, unEx exp2))
+  fun minus (exp1 , exp2) =  Ex (T.BINOP(T.MINUS,unEx exp1, unEx exp2))
+  fun mult (exp1 , exp2) =  Ex (T.BINOP(T.MUL,unEx exp1,unEx exp2))
+  fun divide (exp1 , exp2) =  Ex (T.BINOP(T.DIV,unEx exp1,unEx exp2))
+  fun eq (exp1 , exp2) =  relopCxHelper(T.EQ,exp1,exp2)
+  fun neq (exp1 , exp2) =  relopCxHelper(T.NE,exp1,exp2)
+  fun lt (exp1 , exp2) = relopCxHelper(T.LT,exp1,exp2)
+  fun gt (exp1 , exp2) =  relopCxHelper(T.GT,exp1,exp2)
+  fun le (exp1 , exp2) =  relopCxHelper(T.LE,exp1,exp2)
+  fun ge (exp1 , exp2) =  relopCxHelper(T.GE,exp1,exp2)
+
+
+
+
   fun recordExp l = 
   let 
     val exp_with_indexes = addIndexTuple l

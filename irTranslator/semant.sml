@@ -89,6 +89,17 @@ fun transExp (venv, tenv, level) =
 				let 
 					val left' = trexp left
 					val right' = trexp right
+					fun getTrFunc (A.PlusOp) = Tr.add 
+					  | getTrFunc (A.MinusOp) = Tr.minus
+					  | getTrFunc (A.TimesOp) = Tr.mult
+					  | getTrFunc (A.DivideOp) = Tr.divide
+					  | getTrFunc (A.EqOp) = Tr.eq
+					  | getTrFunc (A.NeqOp) = Tr.neq
+					  | getTrFunc (A.LtOp) = Tr.lt
+					  | getTrFunc (A.LeOp) = Tr.gt
+					  | getTrFunc (A.GtOp) = Tr.le
+					  | getTrFunc (A.GeOp) = Tr.ge
+					val trfunc = getTrFunc(oper)
 				in 
 
 				((case (left') 
@@ -115,7 +126,7 @@ fun transExp (venv, tenv, level) =
 					| 	{exp=_, ty = Types.BOTTOM} => ()
 					| 	_ => (ErrorMsg.error pos "invalid operation")
 				);
-				{exp = (Tr.nilExp()), ty = Types.INT})
+				{exp = (trfunc (#exp left',#exp right')), ty = Types.INT})
 				end
 
         	
