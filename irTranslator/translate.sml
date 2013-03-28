@@ -32,6 +32,13 @@ sig
   val le:  exp * exp -> exp
   val ge:  exp * exp -> exp
 
+  val stringeq:  exp * exp -> exp
+  val stringneq:  exp * exp -> exp
+  val stringlt:  exp * exp -> exp
+  val stringgt:  exp * exp -> exp
+  val stringle:  exp * exp -> exp
+  val stringge:  exp * exp -> exp
+
 
 
  	val nilExp : unit -> exp
@@ -187,6 +194,15 @@ struct
   fun gt (exp1 , exp2) =  relopCxHelper(T.GT,exp1,exp2)
   fun le (exp1 , exp2) =  relopCxHelper(T.LE,exp1,exp2)
   fun ge (exp1 , exp2) =  relopCxHelper(T.GE,exp1,exp2)
+
+
+ (* do this later *)
+  fun stringeq (exp1 , exp2) =  relopCxHelper(T.EQ,exp1,exp2)
+  fun stringneq (exp1 , exp2) =  relopCxHelper(T.NE,exp1,exp2)
+  fun stringlt (exp1 , exp2) = relopCxHelper(T.LT,exp1,exp2)
+  fun stringgt (exp1 , exp2) =  relopCxHelper(T.GT,exp1,exp2)
+  fun stringle (exp1 , exp2) =  relopCxHelper(T.LE,exp1,exp2)
+  fun stringge (exp1 , exp2) =  relopCxHelper(T.GE,exp1,exp2)
 
 
 

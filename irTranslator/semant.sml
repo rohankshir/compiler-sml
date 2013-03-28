@@ -99,12 +99,23 @@ fun transExp (venv, tenv, level) =
 					  | getTrFunc (A.LeOp) = Tr.gt
 					  | getTrFunc (A.GtOp) = Tr.le
 					  | getTrFunc (A.GeOp) = Tr.ge
-					val trfunc = getTrFunc(oper)
+					val trfunc = ref (getTrFunc(oper))
 				in 
 
 				((case (left') 
 					of {exp=_,ty=Types.INT} => checkInt(right', pos)
-					|  {exp=_,ty=Types.STRING} => checkString(right', pos)
+					|  {exp=_,ty=Types.STRING} => 
+					(checkString(right', pos);(if (#ty right') = Types.STRING
+						then
+						(case oper
+							of A.EqOp => trfunc := Tr.stringeq
+							|  A.NeqOp => trfunc := Tr.stringneq
+							|  A.LtOp =>trfunc := Tr.stringlt
+							|  A.LeOp => trfunc := Tr.stringle
+							|  A.GtOp => trfunc := Tr.stringgt
+							|  A.GeOp =>trfunc := Tr.stringge)
+						else ()))
+						
 					|  {exp=_,ty=Types.ARRAY(_)} =>
 						(case oper 
 							of A.EqOp => (if eqTypes(#ty left', #ty right') then () else ErrorMsg.error pos "type mismatch")
@@ -126,7 +137,7 @@ fun transExp (venv, tenv, level) =
 					| 	{exp=_, ty = Types.BOTTOM} => ()
 					| 	_ => (ErrorMsg.error pos "invalid operation")
 				);
-				{exp = (trfunc (#exp left',#exp right')), ty = Types.INT})
+				{exp = (!trfunc (#exp left',#exp right')), ty = Types.INT})
 				end
 
         	
