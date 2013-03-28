@@ -4,7 +4,7 @@ sig
 	type access (* not the same as Fram.access *)
 	type exp 
 	type breakpoint
-	type frag
+	
 
   val ERROR : exp
 
@@ -57,9 +57,7 @@ sig
   val subscriptVar: exp * exp -> exp
   val fieldVar: exp * int -> exp
 
-	val procEntryExit: {level: level, body: exp} -> unit
- 	val getResult : unit -> frag list
-
+  val procEntryExit: {level:level, body:exp} -> unit
   val newBreakPt : unit -> breakpoint
 
 end 
@@ -76,8 +74,7 @@ struct
 	datatype level = Top | Level of {unique: unit ref, frame: Frame.frame, parent: level}
 	type access = level * Frame.access
 	type breakpoint = Temp.label
-  type frag = Frame.frag
-	val frags = ref [] : frag list ref (* Init frag list to empty list *)
+
   val outermost = Top
   val ERROR = Ex (T.CONST 9999)
 
@@ -235,9 +232,11 @@ struct
 
    fun stringLiteral str = 
    		let 
-   			val label = Temp.newlabel() 
+        val label = Temp.newlabel()
+        val strfrag = Frame.STRING(label, str)
    		in
-   			frags := Frame.STRING(label, str)::(!frags);
+        Frame.addFrag(strfrag);
+   			(*Frame.frags := Frame.STRING(label, str)::(!(Frame.frags));*)
    			Ex (T.NAME label)
    		end
 
@@ -311,23 +310,23 @@ struct
     Ex (T.CALL(T.NAME label,staticlink::args'))
   end
     
-
-
-
-
-
-
-
-	fun procEntryExit {level=Level {unique, frame, parent}, body} =
+  fun procEntryExit {level=Level {unique, frame, parent}, body} =
       let
-        val body' = Frame.procEntryExit1(frame, unNx body)
-        val frag = Frame.PROC {body = body', frame = frame} 
+        val bodyexp = T.MOVE (T.TEMP Frame.RV, unEx body)
+        val body' = Frame.procEntryExit1(frame, bodyexp)
+        val newfrag = Frame.PROC {body = body', frame = frame} 
       in
-        frags := (frag :: !frags)
+        Frame.addFrag(newfrag)
       end
       | procEntryExit _ = ErrorMsg.impossible "Cannot create procEntryExit at Top level"
 
- fun getResult () = !frags
+
+ 
+
+
+
+
+	
 
 
 

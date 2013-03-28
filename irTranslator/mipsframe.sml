@@ -10,6 +10,8 @@ struct
   datatype frag = PROC of {body: Tree.stm, frame: frame}
                   | STRING of Temp.label * string
   val wordsize = 4
+
+  val frags = ref [] : frag list ref (* Init frag list to empty list *)
   
   structure T = Tree
 
@@ -49,4 +51,7 @@ struct
             InReg(Temp.newtemp())))
 
   fun procEntryExit1 (frame, stm) = stm
+  fun addFrag f = frags := (f :: !frags)
+  fun getResult () = !frags
+
 end
