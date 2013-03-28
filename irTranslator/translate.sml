@@ -32,12 +32,9 @@ sig
   val le:  exp * exp -> exp
   val ge:  exp * exp -> exp
 
-  val stringeq:  exp * exp -> exp
-  val stringneq:  exp * exp -> exp
-  val stringlt:  exp * exp -> exp
-  val stringgt:  exp * exp -> exp
-  val stringle:  exp * exp -> exp
-  val stringge:  exp * exp -> exp
+  val stringEq:  exp * exp -> exp
+  val stringNeq:  exp * exp -> exp
+
 
 
 
@@ -255,13 +252,14 @@ struct
 
 
  (* do this later *)
-  fun stringeq (exp1 , exp2) =  relopCxHelper(T.EQ,exp1,exp2)
-  fun stringneq (exp1 , exp2) =  relopCxHelper(T.NE,exp1,exp2)
-  fun stringlt (exp1 , exp2) = relopCxHelper(T.LT,exp1,exp2)
-  fun stringgt (exp1 , exp2) =  relopCxHelper(T.GT,exp1,exp2)
-  fun stringle (exp1 , exp2) =  relopCxHelper(T.LE,exp1,exp2)
-  fun stringge (exp1 , exp2) =  relopCxHelper(T.GE,exp1,exp2)
-
+  fun stringEq (exp1 , exp2) =  Ex (Frame.externalCall("stringEqual", [unEx exp1,unEx exp2]))
+  fun stringNeq (exp1 , exp2) =  
+  let
+    val isEqExp = Frame.externalCall("stringEqual", [unEx exp1,unEx exp2])
+    val complement = eq(Ex isEqExp,Ex (T.CONST 0))
+  in
+    complement
+  end
 
 (* make this better *)
   fun ifExp (exp1,exp2,exp3) = 

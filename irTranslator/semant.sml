@@ -90,12 +90,14 @@ fun transExp (venv, tenv, level, break) =
 				let 
 					val left' = trexp left
 					val right' = trexp right
+					fun areStrings (Types.STRING,Types.STRING) = true
+					   | areStrings (_,_) = false
 					fun getTrFunc (A.PlusOp) = Tr.add 
 					  | getTrFunc (A.MinusOp) = Tr.minus
 					  | getTrFunc (A.TimesOp) = Tr.mult
 					  | getTrFunc (A.DivideOp) = Tr.divide
-					  | getTrFunc (A.EqOp) = Tr.eq
-					  | getTrFunc (A.NeqOp) = Tr.neq
+					  | getTrFunc (A.EqOp) =  if areStrings(#ty left',#ty right') then Tr.stringEq else Tr.eq
+					  | getTrFunc (A.NeqOp) = if areStrings(#ty left',#ty right') then Tr.stringNeq else Tr.neq
 					  | getTrFunc (A.LtOp) = Tr.lt
 					  | getTrFunc (A.LeOp) = Tr.gt
 					  | getTrFunc (A.GtOp) = Tr.le
@@ -105,17 +107,7 @@ fun transExp (venv, tenv, level, break) =
 
 				((case (left') 
 					of {exp=_,ty=Types.INT} => checkInt(right', pos)
-					|  {exp=_,ty=Types.STRING} => 
-					(checkString(right', pos);(if (#ty right') = Types.STRING
-						then
-						(case oper
-							of A.EqOp => trfunc := Tr.stringeq
-							|  A.NeqOp => trfunc := Tr.stringneq
-							|  A.LtOp =>trfunc := Tr.stringlt
-							|  A.LeOp => trfunc := Tr.stringle
-							|  A.GtOp => trfunc := Tr.stringgt
-							|  A.GeOp =>trfunc := Tr.stringge)
-						else ()))
+					|  {exp=_,ty=Types.STRING} => checkString(right', pos)
 						
 					|  {exp=_,ty=Types.ARRAY(_)} =>
 						(case oper 
