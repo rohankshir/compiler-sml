@@ -142,8 +142,9 @@ fun transExp (venv, tenv, level) =
 		        			else ErrorMsg.error pos "Mismatching field types"
 		        		end 
 		        	val () = app checkFieldTypes fields
+		        	val fieldExps = map #exp(map trexp (map #2 fields))
         		in
-        			{exp = (Tr.nilExp()), ty = actualType}
+        			{exp = (Tr.recordExp(fieldExps)), ty = actualType}
         		end
 
         									
@@ -225,7 +226,8 @@ fun transExp (venv, tenv, level) =
 
         	| trexp (A.ArrayExp {typ, size, init, pos})=					(* ArrayExp *)
       			let 
-          			val {exp=_, ty=tyinit}=trexp init;
+          			val {exp =initexp, ty=tyinit}=trexp init
+          			val {exp = sizeexp, ty = tysize} = trexp size
       			in
       				checkInt (trexp size, pos);
         			case S.look(tenv,typ) of 
@@ -234,7 +236,7 @@ fun transExp (venv, tenv, level) =
           		 			case actual_ty t  of
           		 			Types.ARRAY (ty,unique) =>              
                				(if eqTypes(tyinit,ty) 
-               					then {exp = (Tr.nilExp()), ty=Types.ARRAY (ty,unique) }
+               					then {exp = (Tr.arrayExp(sizeexp,initexp)), ty=Types.ARRAY (ty,unique) }
                					else (ErrorMsg.error pos ("Expected: " ^ Types.toString ty ^ " Actual: " ^ Types.toString tyinit); {exp = (Tr.nilExp()), ty = Types.BOTTOM}))
                				| _ => (ErrorMsg.error pos (S.name typ ^" is not of array type"); {exp = (Tr.nilExp()), ty = Types.BOTTOM})   			
            	 end

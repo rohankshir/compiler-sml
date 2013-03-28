@@ -21,6 +21,8 @@ struct
       T.MEM(T.BINOP(T.PLUS, e,T.CONST(i)))
       | exp (InReg r) (T.TEMP(FP)) = T.TEMP(r)
 
+  fun externalCall (s,args) = T.CALL(T.NAME(Temp.namedlabel s), args)
+
   fun allocFormal (esc, (accs,frameOffset)) =
           (* if formal escapes, add InFrame to access list and push frameOffset down *)
           (case esc of true => (InFrame(frameOffset - wordsize)::accs, frameOffset - wordsize)

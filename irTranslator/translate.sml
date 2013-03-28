@@ -20,6 +20,8 @@ sig
   val intLiteral : int -> exp
   val stringLiteral : string -> exp
  	val nilExp : unit -> exp
+  val recordExp: exp list -> exp
+  val arrayExp: exp * exp -> exp
   (*val callExp : Temp.label * level * level * exp list -> exp *)
 
   val simpleVar: access * level -> exp
@@ -51,6 +53,12 @@ struct
   val ERROR = Ex (T.CONST 9999)
 
   (* HELPERS *)
+  fun addIndexTuple l = 
+  let fun helper (a::l,n,result) = helper(l,n+1,(a,n)::result)
+      | helper ([], n, result) = result
+  in 
+    helper(l,0,[])
+  end
   fun eqLevel(Level {unique=unique1 ,frame =_ , parent = _} , Level {unique= unique2,frame =_ , parent = _}) = (unique1 = unique2)
      | eqLevel(Top,Top) = true
      | eqLevel(_,_) = false
@@ -63,7 +71,6 @@ struct
         else helper(parentLevel, Frame.exp(hd(Frame.formals f)) (exp))
     in helper(child,T.TEMP(Frame.FP))
     end
-
   (* STUFF *)
 	fun newLevel {parent, name, formals} = Level {unique = ref (), 
 												  frame = Frame.newFrame {name=name, formals = true::formals},
@@ -149,7 +156,29 @@ struct
    			frags := Frame.STRING(label, str)::(!frags);
    			Ex (T.NAME label)
    		end
+  fun recordExp l = 
+  let 
+    val exp_with_indexes = addIndexTuple l
+    val n = length l
+    val r = Temp.newtemp()
+    fun allocField (exp,n) = T.MOVE(T.MEM(T.BINOP(T.PLUS, T.TEMP(r), 
+         T.CONST(n*Frame.wordsize))),unEx exp)
+    val explist = map allocField exp_with_indexes
+    val seqoflist = seq explist
+    val extCall = T.MOVE(T.TEMP(r), T.CALL(T.NAME(Temp.namedlabel("malloc")),[T.CONST(n*Frame.wordsize)]))
+    val result = T.ESEQ(T.SEQ(extCall,seqoflist),T.TEMP(r))
+  in
+    Ex result
+  end
 
+  fun arrayExp  (sizeexp, initexp) = 
+    let
+      val r = Temp.newtemp()
+      val arrayArgs = [unEx sizeexp, unEx initexp]
+      val arrayAlloc = T.MOVE(T.TEMP(r),Frame.externalCall("initArray",arrayArgs))
+    in 
+      Ex (T.ESEQ(arrayAlloc,T.TEMP(r)))
+    end
  (*fun callExp (label, currlevel, calllevel, args) = 
     case calllevel of 
       Level {unique, frame, parent = parent as Level _ } => Ex (T.CALL (T.NAME label, ))

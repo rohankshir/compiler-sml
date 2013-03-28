@@ -7,6 +7,7 @@ sig type frame
     val formals : frame -> access list  
     val allocLocal : frame -> bool -> access
     val exp : access -> Tree.exp -> Tree.exp
+    val externalCall: string * Tree.exp list -> Tree.exp
     val FP : Temp.temp
     val wordsize: int
 
