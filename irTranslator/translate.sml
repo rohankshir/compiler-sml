@@ -275,8 +275,9 @@ struct
     val e2 = allocExp(unEx exp2 , t)
     val e3 = allocExp(unEx exp3 , f)
     val cjmp = e1 (t,f)
+    val resultseq = seq([cjmp,e2,e3,T.LABEL(join)])
   in
-    Nx(seq([cjmp,e2,e3]))
+    Ex(T.ESEQ(resultseq,T.TEMP(r)))
   end
 
 
