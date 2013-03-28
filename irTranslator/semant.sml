@@ -70,13 +70,14 @@ fun transExp (venv, tenv, level, break) =
         	|	trexp (A.StringExp (s,pos)) = 			{exp=(Tr.stringLiteral(s)),ty=Types.STRING}		(* StringExp *)
         	|	trexp (A.CallExp {func, args, pos}) = 						(* CallExp *)
         		(case Symbol.look(venv,func) of 
-        				SOME (E.FunEntry {level,label,formals, result}) => 
+        				SOME (E.FunEntry {level=funclevel,label=label,formals=formals, result=result}) => 
         					let 
 
         						val argtys = map #ty (map trexp args)
+        						val argexps = map (#exp o trexp) args
         					in 
         						if eqTypeList(formals, argtys) 
-        						then {exp = (Tr.nilExp()), ty=actual_ty result} 
+        						then {exp = (Tr.callExp(label,level,funclevel,argexps)), ty=actual_ty result} 
         						else (ErrorMsg.error pos ((S.name func) ^"function arguments do not agree"); {exp=(Tr.nilExp()),ty=Types.BOTTOM})
         					end
         			| 	SOME (E.VarEntry{access, ty}) => ((ErrorMsg.error pos "undefined function"); {exp = (Tr.nilExp()), ty = Types.BOTTOM})	
@@ -414,7 +415,7 @@ fun transExp (venv, tenv, level, break) =
 												SOME(E.FunEntry f) => (#level f)
 												| _ => level)
 						
-							val bodyType = #ty (transExp(venv'',tenv,currentlevel,break) body)
+							val {exp = bodyexp , ty=bodyType} =  (transExp(venv'',tenv,currentlevel,break) body)
 						in
 						if eqTypes(bodyType,result_ty) then () else (ErrorMsg.error pos "function does not evaluate to correct type")
 						end

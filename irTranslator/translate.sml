@@ -51,8 +51,7 @@ sig
   val assignExp : exp * exp -> exp
   val seqExp : exp list -> exp
   val letExp : exp list * exp -> exp
-
-  (*val callExp : Temp.label * level * level * exp list -> exp *)
+  val callExp : Temp.label * level * level * exp list -> exp 
 
   val simpleVar: access * level -> exp
   val subscriptVar: exp * exp -> exp
@@ -304,12 +303,16 @@ struct
     in 
       Ex (T.ESEQ(arrayAlloc,T.TEMP(r)))
     end
- (*fun callExp (label, currlevel, calllevel, args) = 
-    case calllevel of 
-      Level {unique, frame, parent = parent as Level _ } => Ex (T.CALL (T.NAME label, ))
-      (*FINISH THIS***)
+ fun callExp (label, currlevel, funclevel, args) = 
+  let
+    val staticlink = convStaticLink(currlevel,funclevel)
+    val args' = map unEx args
+  in
+    Ex (T.CALL(T.NAME label,staticlink::args'))
+  end
+    
 
-*)
+
 
 
 

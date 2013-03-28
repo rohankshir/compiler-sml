@@ -14,6 +14,7 @@ struct
   structure T = Tree
 
   val FP = Temp.newtemp()
+  val RV = Temp.newtemp()
 
   fun exp (InFrame i) (e) = 
       T.MEM(T.BINOP(T.PLUS, e,T.CONST(i)))
