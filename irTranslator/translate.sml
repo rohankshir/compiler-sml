@@ -45,6 +45,7 @@ sig
   val recordExp: exp list -> exp
   val arrayExp: exp * exp -> exp
   val ifExp: exp * exp * exp -> exp
+  val ifThenExp: exp * exp  -> exp
   val whileExp : exp * exp * breakpoint -> exp
   val forExp : exp * exp * exp * exp * breakpoint -> exp
   val breakExp : breakpoint -> exp
@@ -277,6 +278,19 @@ struct
     val resultseq = seq([cjmp,e2,e3,T.LABEL(join)])
   in
     Ex(T.ESEQ(resultseq,T.TEMP(r)))
+  end
+
+  fun ifThenExp (exp1,exp2) = 
+  let
+    val t = Temp.newlabel()
+    val join = Temp.newlabel()
+    fun allocExp (e,label) = seq([T.LABEL(label),e,T.JUMP(T.NAME(join),[join])])
+    val e1 = unCx exp1
+    val thenstm = allocExp(unNx exp2 , t)
+    val cjmp = e1 (t,join)
+    val resultseq = seq([cjmp,thenstm,T.LABEL(join)])
+  in
+    Nx resultseq
   end
 
 

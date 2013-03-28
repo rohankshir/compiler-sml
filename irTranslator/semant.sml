@@ -195,10 +195,15 @@ fun transExp (venv, tenv, level, break) =
 
   
         	| trexp (A.IfExp {test, then' = thenexp, else' = NONE, pos}) =  (* IfExp *)
-        		(checkInt(trexp test,pos);
-        		checkUnit(trexp thenexp,pos);
-        		{exp = (Tr.nilExp()),ty=Types.UNIT})
-
+        		
+		   		let
+			   		val testexpty = trexp test
+			   		val thenexpty = trexp thenexp     
+	        		val () = checkInt(testexpty,pos)
+	    			val () = checkUnit(thenexpty,pos)
+	    		in
+        			{exp = Tr.ifThenExp(#exp testexpty,#exp thenexpty),ty=Types.UNIT}
+				end
         	| trexp (A.IfExp {test, then' = thenexp, else'=SOME(elseexp), pos}) =
         		let
         			val test_expty = trexp test
