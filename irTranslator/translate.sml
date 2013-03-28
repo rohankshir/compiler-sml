@@ -44,6 +44,7 @@ sig
  	val nilExp : unit -> exp
   val recordExp: exp list -> exp
   val arrayExp: exp * exp -> exp
+  val ifExp: exp * exp * exp -> exp
   (*val callExp : Temp.label * level * level * exp list -> exp *)
 
   val simpleVar: access * level -> exp
@@ -204,7 +205,7 @@ struct
   fun stringle (exp1 , exp2) =  relopCxHelper(T.LE,exp1,exp2)
   fun stringge (exp1 , exp2) =  relopCxHelper(T.GE,exp1,exp2)
 
-
+  fun ifExp (exp1,exp2,exp3) = exp1
 
 
   fun recordExp l = 

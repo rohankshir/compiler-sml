@@ -198,13 +198,14 @@ fun transExp (venv, tenv, level) =
 
         	| trexp (A.IfExp {test, then' = thenexp, else'=SOME(elseexp), pos}) =
         		let
-        			val then_ty = #ty (trexp thenexp)
-        			val else_ty = #ty (trexp  elseexp)
+        			val test_expty = trexp test
+        			val then_expty = trexp thenexp
+        			val else_expty = trexp  elseexp
         		in
-        			(checkInt(trexp test,pos);
-        		 	if eqTypes(then_ty, else_ty) 
-        		 	then {exp=(Tr.nilExp()),ty=then_ty}
-        		 	else (ErrorMsg.error pos "then and else expressions must have same type"; {exp=(Tr.nilExp()),ty=then_ty})
+        			(checkInt(test_expty,pos);
+        		 	if eqTypes(#ty then_expty, #ty else_expty) 
+        		 	then {exp=(Tr.ifExp(#exp test_expty, #exp then_expty, #exp else_expty)),ty=(#ty then_expty)}
+        		 	else (ErrorMsg.error pos "then and else expressions must have same type"; {exp=(Tr.nilExp()),ty=(#ty then_expty)})
         		 	)
         		end
 

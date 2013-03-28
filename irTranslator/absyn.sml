@@ -24,6 +24,7 @@ and exp = VarExp of var
         | BreakExp of pos
         | LetExp of {decs: dec list, body: exp, pos: pos}
         | ArrayExp of {typ: symbol, size: exp, init: exp, pos: pos}
+    
 
 and dec = FunctionDec of fundec list
         | VarDec of {name: symbol,
