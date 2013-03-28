@@ -157,11 +157,10 @@ struct
       val var = unEx varexp
       val sub = unEx subexp
     in
-        Ex(T.ESEQ(T.MOVE(T.TEMP(Temp.newtemp()),
+        Ex(T.MEM(
           T.BINOP(T.PLUS,var,
           T.BINOP(T.MUL,sub,
-          T.CONST(Frame.wordsize)))),
-          T.MEM(T.TEMP(Temp.newtemp()))))
+          T.CONST(Frame.wordsize)))))
     end
 
   fun fieldVar (varexp, offset) =

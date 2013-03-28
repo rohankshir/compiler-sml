@@ -433,7 +433,8 @@ fun transProg ast =
 		val startLevel = Tr.newLevel{parent = Translate.outermost, name = Temp.newlabel(), formals=[]}
 		val {exp=result,ty=_} = transExp (E.base_venv,E.base_tenv, startLevel, Temp.newlabel()) ast
 	in 
-		Tr.unNx(result)
+		(Tr.procEntryExit {level = startLevel, body = result};
+		Tr.unNx(result))
 	end
 
 end
