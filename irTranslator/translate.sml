@@ -329,7 +329,13 @@ struct
     in
       Ex (T.CALL(T.NAME label,staticlink::args'))
     end
-    
+  | callExp (label,currlevel,funclevel as Top, args) = 
+    let
+      val args' = map unEx args
+    in
+      Ex (Frame.externalCall(Symbol.name label,args'))
+    end
+
   fun procEntryExit {level=Level {unique, frame, parent}, body} =
       let
         val bodyexp = T.MOVE (T.TEMP Frame.RV, unEx body)

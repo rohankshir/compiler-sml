@@ -21,16 +21,16 @@ structure Env :> ENV =
 	in 
 		foldl helper Symbol.empty
 		[
-		(symbol("print"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING], result=Types.UNIT}),
-    	(symbol("flush"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[], result=Types.UNIT}),
-    	(symbol("getchar"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[], result=Types.STRING}),
-    	(symbol("ord"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING], result=Types.INT}),
-    	(symbol("chr"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.INT], result=Types.STRING}),
-    	(symbol("size"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING], result=Types.INT}),
-    	(symbol("substring"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING,Types.INT,Types.INT], result=Types.STRING}),
-    	(symbol("concat"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.STRING,Types.STRING], result=Types.STRING}),
-    	(symbol("not"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.INT], result=Types.INT}),
-    	(symbol("exit"), FunEntry {level = Translate.outermost, label=Temp.newlabel(), formals=[Types.INT], result=Types.UNIT})
+		(symbol("print"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("print"), formals=[Types.STRING], result=Types.UNIT}),
+    	(symbol("flush"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("flush"), formals=[], result=Types.UNIT}),
+    	(symbol("getchar"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("getchar"), formals=[], result=Types.STRING}),
+    	(symbol("ord"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("ord"), formals=[Types.STRING], result=Types.INT}),
+    	(symbol("chr"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("chr"), formals=[Types.INT], result=Types.STRING}),
+    	(symbol("size"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("size"), formals=[Types.STRING], result=Types.INT}),
+    	(symbol("substring"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("substring"), formals=[Types.STRING,Types.INT,Types.INT], result=Types.STRING}),
+    	(symbol("concat"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("concat"), formals=[Types.STRING,Types.STRING], result=Types.STRING}),
+    	(symbol("not"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("not"), formals=[Types.INT], result=Types.INT}),
+    	(symbol("exit"), FunEntry {level = Translate.outermost, label=Temp.namedlabel("exit"), formals=[Types.INT], result=Types.UNIT})
   		]
 	end
 

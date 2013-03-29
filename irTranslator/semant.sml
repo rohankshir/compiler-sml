@@ -75,6 +75,7 @@ fun transExp (venv, tenv, level, break) =
 
         						val argtys = map #ty (map trexp args)
         						val argexps = map (#exp o trexp) args
+        						val () = print ("Calling Function" ^ (S.name label) ^ "\n")
         					in 
         						if eqTypeList(formals, argtys) 
         						then {exp = (Tr.callExp(label,level,funclevel,argexps)), ty=actual_ty result} 

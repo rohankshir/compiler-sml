@@ -54,8 +54,8 @@ struct
   fun addFrag f = frags := (f :: !frags)
   fun getResult () = !frags
 
-  fun printFrag (PROC {body, frame})  = (print "-----PROC-----\n" ; Printtree.printtree (TextIO.stdOut, body))
-    | printFrag (STRING (label,str)) = (print "-----STRING-----\n"; print str)
+  fun printFrag (PROC {body, frame})  = (print "\n-----PROC-----\n" ; Printtree.printtree (TextIO.stdOut, body))
+    | printFrag (STRING (label,str)) = (print "\n-----STRING-----\n"; print str)
 
   fun printFragList l = app printFrag l
 
