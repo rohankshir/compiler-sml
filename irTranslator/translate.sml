@@ -91,14 +91,17 @@ struct
      | eqLevel(Top,Top) = true
      | eqLevel(_,_) = false
 
-  fun convStaticLink (parent, child) = 
-    let
-      fun helper (lev as Level {unique = u,frame = f ,parent = parentLevel},exp) = 
-        if (eqLevel(lev,parent))
-        then exp
-        else helper(parentLevel, Frame.exp(hd(Frame.formals f)) (exp))
-    in helper(child,T.TEMP(Frame.FP))
-    end
+
+  fun convStaticLink (declevel, currlevel) = 
+  let 
+    fun helper (lev as Level{unique,frame,parent},exp) = 
+      if (eqLevel(lev, declevel))
+      then exp
+      else helper (parent,Frame.exp(hd(Frame.formals frame)) exp)
+  in 
+    helper(currlevel,T.TEMP(Frame.FP))
+  end
+
   (* STUFF *)
 	fun newLevel {parent, name, formals} = Level {unique = ref (), 
 												  frame = Frame.newFrame {name=name, formals = true::formals},
@@ -318,13 +321,14 @@ struct
     in 
       Ex (T.ESEQ(arrayAlloc,T.TEMP(r)))
     end
- fun callExp (label, currlevel, funclevel, args) = 
-  let
-    val staticlink = convStaticLink(currlevel,funclevel)
-    val args' = map unEx args
-  in
-    Ex (T.CALL(T.NAME label,staticlink::args'))
-  end
+
+  fun callExp (label, currlevel, funclevel as Level {unique,frame,parent} , args) = 
+    let
+      val staticlink = convStaticLink(parent,currlevel)
+      val args' = map unEx args
+    in
+      Ex (T.CALL(T.NAME label,staticlink::args'))
+    end
     
   fun procEntryExit {level=Level {unique, frame, parent}, body} =
       let
