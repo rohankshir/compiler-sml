@@ -4,7 +4,7 @@ sig
 	type access (* not the same as Fram.access *)
 	type exp 
 	type breakpoint
-	
+	type frag
 
   val ERROR : exp
 
@@ -59,6 +59,9 @@ sig
 
   val procEntryExit: {level:level, body:exp} -> unit
   val newBreakPt : unit -> breakpoint
+  val getResult : unit -> frag list
+  val addFrag : frag -> unit
+  val clearFrags: unit -> unit
 
 end 
 
@@ -74,6 +77,7 @@ struct
 	datatype level = Top | Level of {unique: unit ref, frame: Frame.frame, parent: level}
 	type access = level * Frame.access
 	type breakpoint = Temp.label
+  type frag = Frame.frag
 
   val outermost = Top
   val ERROR = Ex (T.CONST 9999)
@@ -319,6 +323,12 @@ struct
         Frame.addFrag(newfrag)
       end
       | procEntryExit _ = ErrorMsg.impossible "Cannot create procEntryExit at Top level"
+
+    fun getResult () = Frame.getResult()
+
+    fun addFrag f = Frame.addFrag f
+
+    fun clearFrags () = Frame.clearFrags()
 
 
  

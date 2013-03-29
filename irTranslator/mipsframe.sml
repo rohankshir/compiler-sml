@@ -20,7 +20,7 @@ struct
 
   fun exp (InFrame i) (e) = 
       T.MEM(T.BINOP(T.PLUS, e,T.CONST(i)))
-      | exp (InReg r) (T.TEMP(FP)) = T.TEMP(r)
+      | exp (InReg r) (t) = T.TEMP(r)
 
   fun externalCall (s,args) = T.CALL(T.NAME(Temp.namedlabel s), args)
 
@@ -53,5 +53,20 @@ struct
   fun procEntryExit1 (frame, stm) = stm
   fun addFrag f = frags := (f :: !frags)
   fun getResult () = !frags
+
+  fun printFrag (PROC {body, frame})  = (print "-----PROC-----\n" ; Printtree.printtree (TextIO.stdOut, body))
+    | printFrag (STRING (label,str)) = (print "-----STRING-----\n"; print str)
+
+  fun printFragList l = app printFrag l
+
+  fun clearFrags () = (frags := [])
+ 
+
+
+
+
+
+
+
 
 end

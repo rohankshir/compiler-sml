@@ -1,6 +1,6 @@
 signature SEMANT = 
 sig 
-	val transProg : Absyn.exp -> Tree.stm
+	val transProg : Absyn.exp -> Translate.frag list
 end
 
 
@@ -417,25 +417,26 @@ fun transExp (venv, tenv, level, break) =
 						
 							val {exp = bodyexp , ty=bodyType} =  (transExp(venv'',tenv,currentlevel,break) body)
 						in
-						if eqTypes(bodyType,result_ty) then () else (ErrorMsg.error pos "function does not evaluate to correct type")
+						if eqTypes(bodyType,result_ty) 
+						then (Tr.procEntryExit{level = currentlevel, body = bodyexp}) 
+						else (ErrorMsg.error pos "function does not evaluate to correct type")
 						end
 					val () = app processBodies l
 				in 
+
 					{venv=venv',tenv=tenv,level=level, break = break, explist = explist}
 				end
 
 
-
-
-
-
 fun transProg ast = 
 	let 
-		val startLevel = Tr.newLevel{parent = Translate.outermost, name = Temp.newlabel(), formals=[]}
-		val {exp=result,ty=_} = transExp (E.base_venv,E.base_tenv, startLevel, Temp.newlabel()) ast
+		val () = Tr.clearFrags()
+		val startLevel = Tr.newLevel{parent = Translate.outermost, name = Temp.namedlabel("startlev"), formals=[]}
+		val {exp=result,ty=ty} = transExp (E.base_venv,E.base_tenv, startLevel, Temp.newlabel()) ast
+		val () = Tr.procEntryExit {level = startLevel, body = result}
+		val frags = Tr.getResult()
 	in 
-		(Tr.procEntryExit {level = startLevel, body = result};
-		Tr.unNx(result))
+		frags
 	end
 
 end

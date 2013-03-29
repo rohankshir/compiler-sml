@@ -1,4 +1,5 @@
 structure Main = 
 struct
-	fun main fileName = Printtree.printtree (TextIO.stdOut ,Semant.transProg(Parse.parse(fileName)))
+	structure Frame : FRAME = MipsFrame
+	fun main fileName = Frame.printFragList (Semant.transProg(Parse.parse(fileName)))
 end

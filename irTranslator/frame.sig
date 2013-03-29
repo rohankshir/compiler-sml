@@ -19,5 +19,7 @@ sig type frame
    	val procEntryExit1 : frame * Tree.stm -> Tree.stm
     val addFrag : frag -> unit
     val getResult : unit -> frag list
+    val printFragList : frag list -> unit
+    val clearFrags: unit -> unit
 
 end
