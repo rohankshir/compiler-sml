@@ -21,5 +21,6 @@ sig type frame
     val getResult : unit -> frag list
     val printFragList : frag list -> unit
     val clearFrags: unit -> unit
+    val string: Temp.label * string -> string
 
 end

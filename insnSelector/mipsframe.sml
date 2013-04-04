@@ -18,6 +18,8 @@ struct
   val FP = Temp.newtemp()
   val RV = Temp.newtemp()
 
+  fun string (label,s) = Symbol.name (label) ^ ":   " ^ s
+
   fun exp (InFrame i) (e) = 
       T.MEM(T.BINOP(T.PLUS, e,T.CONST(i)))
       | exp (InReg r) (t) = T.TEMP(r)

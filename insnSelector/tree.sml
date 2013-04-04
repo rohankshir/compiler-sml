@@ -24,7 +24,7 @@ datatype stm = SEQ of stm * stm
       and relop = EQ | NE | LT | GT | LE | GE 
 	        | ULT | ULE | UGT | UGE
 
-  (*val notRel : relop -> relop*)
+  val notRel : relop -> relop
   (*val commute: relop -> relop*)
 end
 
@@ -53,5 +53,16 @@ datatype stm = SEQ of stm * stm
 
       and relop = EQ | NE | LT | GT | LE | GE 
 	        | ULT | ULE | UGT | UGE
+    fun notRel EQ = NE
+      | notRel NE = EQ
+      | notRel LT = GT
+      | notRel GT = LT
+      | notRel LE = GE
+      | notRel GE = LE
+      | notRel ULT = UGT
+      | notRel UGT = ULT
+      | notRel ULE = UGE
+      | notRel UGE = ULE
+
 
 end
