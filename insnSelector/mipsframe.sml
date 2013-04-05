@@ -7,6 +7,9 @@ struct
                 numLocals: int ref, 
                 frameOffset: int ref
                 }
+  type register = string
+
+  
   datatype frag = PROC of {body: Tree.stm, frame: frame}
                   | STRING of Temp.label * string
   val wordsize = 4
