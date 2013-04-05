@@ -1,0 +1,6 @@
+let 
+	var a := 1
+	function testEscape() = a
+in
+	testEscape()
+end

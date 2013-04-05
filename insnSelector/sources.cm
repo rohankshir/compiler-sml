@@ -5,6 +5,7 @@ $/basis.cm
 $/smlnj-lib.cm
 absyn.sml
 errormsg.sml
+findescape.sml
 frame.sig
 mipsframe.sml
 printtree.sml
