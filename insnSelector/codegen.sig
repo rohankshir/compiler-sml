@@ -1,5 +1,5 @@
 signature CODEGEN = 
 sig
-	structure FRAME : FRAME
-	val codegen : FRAME.frame -> Tree.stm -> Assem.instr list
+	structure F : FRAME
+	val codegen : F.frame -> Tree.stm -> Assem.instr list
 end

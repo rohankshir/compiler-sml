@@ -10,9 +10,10 @@ sig type frame
     val exp : access -> Tree.exp -> Tree.exp
     val externalCall: string * Tree.exp list -> Tree.exp
 
-    (*val tempMap: register Temp.Table.table*)
+    val tempMap: register Temp.Table.table
     val FP : Temp.temp
     val RV : Temp.temp
+    val RA : Temp.temp
     val wordsize: int
 
     datatype frag = PROC of {body: Tree.stm, frame: frame}

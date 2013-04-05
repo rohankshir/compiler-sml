@@ -1,8 +1,10 @@
 structure Mips:CODEGEN = 
 struct
-	structure FRAME = MipsFrame
+	structure F = MipsFrame
 	structure T = Tree
 	structure A = Assem
+
+	val calldefs = [F.RV,F.RA]
 
 	fun codegen (frame) (stm : Tree.stm) : A.instr list = 
 	let val ilist = ref (nil: A.instr list)

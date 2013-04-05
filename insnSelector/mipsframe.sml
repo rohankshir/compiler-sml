@@ -9,7 +9,7 @@ struct
                 }
   type register = string
 
-  
+
   datatype frag = PROC of {body: Tree.stm, frame: frame}
                   | STRING of Temp.label * string
   val wordsize = 4
@@ -20,6 +20,33 @@ struct
 
   val FP = Temp.newtemp()
   val RV = Temp.newtemp()
+  val RA = Temp.newtemp()
+  val ZERO = Temp.newtemp()
+  val SP = Temp.newtemp()
+  val GP = Temp.newtemp()
+
+
+  val specialregs = [FP,RV,RA,SP,ZERO, GP]
+
+  fun regBuilder i = Temp.newtemp()
+  val argregs = List.tabulate(4,regBuilder)
+  val callersaves = List.tabulate(8,regBuilder)
+  val calleesaves = List.tabulate(8,regBuilder)
+
+  fun buildTempMap() = 
+    let
+      fun addToMap ((temp,register), table ) = Temp.Table.enter(table,temp,register)
+    in 
+      foldl addToMap  Temp.Table.empty [(FP,"fp") , (RV,"rv"), (RA,"ra")]
+    end
+
+  val tempMap = buildTempMap()
+
+  fun registerToString temp = 
+    case Temp.Table.look(tempMap,temp) of
+      SOME(register) => register
+    | NONE => Temp.makestring(temp)
+
 
   fun string (label,s) = Symbol.name (label) ^ ":   " ^ s
 
