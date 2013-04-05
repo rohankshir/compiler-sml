@@ -1,13 +1,5 @@
 let 
 	var a := 1
-	function testEscape(c:int, b:int) = 
-	let
-		function test() = b
-		var x := c
 	in
-	test()
-	end
-
-in
 	a
-end
+	end
