@@ -21,6 +21,8 @@ struct
     		| getBinopString T.OR = "or"
     		| getBinopString _ = "WUT"
 
+    fun printExp t = Printtree.printtree(TextIO.stdOut,T.EXP t)
+
 	val calldefs = [F.RV,F.RA]
 
 	fun codegen (frame) (stm : Tree.stm) : A.instr list = 
@@ -90,13 +92,13 @@ struct
                     dst=[], jump=NONE})
 
     		| munchStm(T.MOVE(T.TEMP i, e2)) =
-        		emit(A.MOVE{assem="move 'd0, 's0\n",
+        		(printExp e2; emit(A.MOVE{assem="move 'd0, 's0\n",
           			src= (munchExp e2),
-          			dst= i})
+          			dst= i}))
 
 		(* T.EXP *)
 			| munchStm (T.EXP exp) = (munchExp exp; ())
-			| munchStm _ = ErrorMsg.impossible("bad munch stm")
+			| munchStm t = Printtree.printtree(TextIO.stdOut,t)
 
 
 		(**************** MUNCH EXP *******************)
@@ -158,7 +160,7 @@ struct
 		   		src=[munchExp e1], dst=[r], jump = NONE}))
 
 		(* T.TEMP *)
-		| munchExp (T.TEMP t) = t
+		| munchExp (T.TEMP t) = (printExp (T.TEMP t);t)
 
 		(* T.ESEQ *)
 		| munchExp (T.ESEQ (stm,exp)) = (munchStm stm; munchExp exp)
@@ -172,13 +174,13 @@ struct
 		| munchExp (T.CONST i) = 
 			result(fn r => emit(A.OPER{assem="li 'd0, " ^ int i ^ "\n",
                 src=[], dst=[r], jump=NONE}))
-		| munchExp _ = ErrorMsg.impossible("bad munch exp")
+		| munchExp t = (Printtree.printtree(TextIO.stdOut,T.EXP t); ErrorMsg.impossible("bad munch exp"))	
 		(* T.CALL *)
 
 
 
 	in 
-		rev (!ilist)
+		munchStm(stm); rev (!ilist)
 	end
 end
 

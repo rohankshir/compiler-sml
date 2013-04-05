@@ -11,6 +11,7 @@ sig type frame
     val externalCall: string * Tree.exp list -> Tree.exp
 
     val tempMap: register Temp.Table.table
+    val registerToString: Temp.temp -> register
     val FP : Temp.temp
     val RV : Temp.temp
     val RA : Temp.temp

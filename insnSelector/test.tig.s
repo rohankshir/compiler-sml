@@ -1,42 +1,23 @@
 MOVE(
- MEM(
-  BINOP(PLUS,
-   TEMP t100,
-   CONST ~8)),
+ TEMP t244,
  CONST 8)
 MOVE(
- TEMP t145,
- BINOP(PLUS,
-  TEMP t100,
-  CONST ~12))
-MOVE(
- TEMP t144,
+ TEMP t245,
  CALL(
   NAME initArray,
-   MEM(
-    BINOP(PLUS,
-     TEMP t100,
-     CONST ~8)),
+   TEMP t244,
    CONST 0))
 MOVE(
- MEM(
-  TEMP t145),
- TEMP t144)
+ TEMP t246,
+ TEMP t245)
 MOVE(
+ TEMP t247,
+ NAME L50)
+MOVE(
+ TEMP t169,
  MEM(
   BINOP(PLUS,
-   TEMP t100,
-   CONST ~16)),
- NAME L143)
-MOVE(
- TEMP t101,
- MEM(
-  BINOP(PLUS,
-   MEM(
-    BINOP(PLUS,
-     TEMP t100,
-     CONST ~12)),
+   TEMP t246,
    BINOP(MUL,
     CONST 3,
     CONST 4))))
-L143:   hello
