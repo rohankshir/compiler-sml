@@ -23,5 +23,12 @@ tiger.grm
 types.sml
 env.sml
 semant.sml
-main.sml
+codegen.sig
+mipscodegen.sml
+main1.sml
+graph.sig
+graph.sml
+canon.sml
+flowgraph.sml
+assem.sml
 $/ml-yacc-lib.cm

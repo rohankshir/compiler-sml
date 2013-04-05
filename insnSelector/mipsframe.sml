@@ -7,6 +7,9 @@ struct
                 numLocals: int ref, 
                 frameOffset: int ref
                 }
+  type register = string
+
+  
   datatype frag = PROC of {body: Tree.stm, frame: frame}
                   | STRING of Temp.label * string
   val wordsize = 4
@@ -17,6 +20,8 @@ struct
 
   val FP = Temp.newtemp()
   val RV = Temp.newtemp()
+
+  fun string (label,s) = Symbol.name (label) ^ ":   " ^ s
 
   fun exp (InFrame i) (e) = 
       T.MEM(T.BINOP(T.PLUS, e,T.CONST(i)))
