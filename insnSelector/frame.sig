@@ -21,9 +21,9 @@ sig type frame
     				| STRING of Temp.label * string
     (*val frags: frag list ref*)
     val procEntryExit1 : frame * Tree.stm -> Tree.stm
-    (*val procEntryExit2 : frame * Assem.instr list -> Assem.instr list
+    val procEntryExit2 : frame * Assem.instr list -> Assem.instr list
     val procEntryExit3 : frame * Assem.instr list -> {prolog: string, body: Assem.instr list, epilog: string}
-*)
+
     val addFrag : frag -> unit
     val getResult : unit -> frag list
     val printFragList : frag list -> unit
