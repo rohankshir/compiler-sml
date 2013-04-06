@@ -13,6 +13,7 @@ struct
   datatype frag = PROC of {body: Tree.stm, frame: frame}
                   | STRING of Temp.label * string
   val wordsize = 4
+  val numArgs = 4
 
   val frags = ref [] : frag list ref (* Init frag list to empty list *)
   
@@ -24,14 +25,15 @@ struct
   val ZERO = Temp.newtemp()
   val SP = Temp.newtemp()
   val GP = Temp.newtemp()
-
-
+  (*double check this*)
+  
   val specialregs = [FP,RV,RA,SP,ZERO, GP]
 
   fun regBuilder i = Temp.newtemp()
   val argregs = List.tabulate(4,regBuilder)
   val callersaves = List.tabulate(8,regBuilder)
   val calleesaves = List.tabulate(8,regBuilder)
+  val calldefs = [FP,RV,RA] @ callersaves
 
   fun buildTempMap() = 
     let
@@ -86,7 +88,7 @@ struct
   fun addFrag f = frags := (f :: !frags)
   fun getResult () = !frags
 
-  fun printFrag (PROC {body, frame})  = (print "\n-----PROC-----\n" ; Printtree.printtree (TextIO.stdOut, body))
+  fun printFrag (PROC {body, frame})  = (print ("\n-----PROC: " ^ Symbol.name (name (frame)) ^"-----\n") ; Printtree.printtree (TextIO.stdOut, body))
     | printFrag (STRING (label,str)) = (print "\n-----STRING-----\n"; print str)
 
   fun printFragList l = app printFrag l

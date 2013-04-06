@@ -2,9 +2,7 @@
 
 let
     var N := 8
-    type intArray = array of int
-    var row := intArray [ N ] of 0
-    var s := "hello"
- in row[3]
+    function test(a:int) :int = a
+ in test(N)
 end
   

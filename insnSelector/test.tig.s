@@ -1,23 +1,24 @@
 MOVE(
- TEMP t244,
+ TEMP t352,
  CONST 8)
 MOVE(
- TEMP t245,
+ TEMP t273,
  CALL(
-  NAME initArray,
-   TEMP t244,
-   CONST 0))
+  NAME L117,
+   TEMP t272,
+   CONST 9999))
+L119:
+li 'd0, 's0
+move 'd0, 's0
+li 'd0, 's0
+jal L117
+move 'd0, 's0
+j L118
+L118:
 MOVE(
- TEMP t246,
- TEMP t245)
-MOVE(
- TEMP t247,
- NAME L50)
-MOVE(
- TEMP t169,
- MEM(
-  BINOP(PLUS,
-   TEMP t246,
-   BINOP(MUL,
-    CONST 3,
-    CONST 4))))
+ TEMP t273,
+ TEMP t354)
+L121:
+move 'd0, 's0
+j L120
+L120:

@@ -23,7 +23,7 @@ struct
 
     fun printExp t = Printtree.printtree(TextIO.stdOut,T.EXP t)
 
-	val calldefs = [F.RV,F.RA]
+	val calldefs = F.calldefs
 
 	fun codegen (frame) (stm : Tree.stm) : A.instr list = 
 	let val ilist = ref (nil: A.instr list)
@@ -81,21 +81,37 @@ struct
 		  			src = [munchExp e1, munchExp e2],
 		  			dst = [], jump = NONE})
 
+		  (*	| munchStm(T.MOVE(T.TEMP t,T.CALL(e,args))) = 
+        		emit(A.OPER{assem = "jal 's0\n",
+        			src = munchExp(e)::munchArgs(0,args),
+        			dst = F.calldefs,
+        			jump = NONE})*)
+
 		  	| munchStm(T.MOVE(T.MEM(T.CONST i),e2)) =
         		emit(A.OPER{assem="sw 's0, " ^ int i ^ "($zero)\n",
                     src=[munchExp e2],
                     dst=[], jump=NONE})
-      
+      		(* T.MOVE(T.MEM(T.TEMP t),e1) ???*)
     		| munchStm(T.MOVE(T.MEM(e1),e2)) =
         		emit(A.OPER{assem="sw 's1, 's0\n",
                     src=[munchExp e1, munchExp e2],
                     dst=[], jump=NONE})
 
+        	| munchStm(T.MOVE(T.TEMP t, T.CONST i)) =
+        		( emit(A.OPER{assem="li 'd0, 's0\n",
+          			src= [],
+          			dst= [t], jump=NONE}))
+
     		| munchStm(T.MOVE(T.TEMP i, e2)) =
-        		(printExp e2; emit(A.MOVE{assem="move 'd0, 's0\n",
+        		( emit(A.MOVE{assem="move 'd0, 's0\n",
           			src= (munchExp e2),
           			dst= i}))
-
+        	(*| munchStm(T.EXP(T.CALL(e,args))) = 
+        		emit(A.OPER{assem = "jal 's0\n",
+        			src = munchExp(e)::munchArgs(0,args),
+        			dst = F.calldefs,
+        			jump = NONE})*)
+        
 		(* T.EXP *)
 			| munchStm (T.EXP exp) = (munchExp exp; ())
 			| munchStm t = Printtree.printtree(TextIO.stdOut,t)
@@ -110,7 +126,6 @@ struct
       	| munchExp(T.BINOP(T.PLUS,T.CONST i,e1)) =
           	result(fn r => emit(A.OPER{assem="addi 'd0, 's0, " ^ int i ^ "\n",
            	src=[munchExp e1], dst=[r], jump=NONE}))
-       	
        		(* subtract immediate *)
        	| munchExp(T.BINOP(T.MINUS,e1,T.CONST i)) =
           	result(fn r => emit(A.OPER{assem="addi 'd0, 's0, " ^ int (~i) ^ "\n",
@@ -159,28 +174,46 @@ struct
 		   		{assem = "lw 'd0, 0('s0)\n",
 		   		src=[munchExp e1], dst=[r], jump = NONE}))
 
+		(* T.CALL *)
+		| munchExp(T.CALL(T.NAME(lab),args)) = 
+			result(fn r=> emit(A.OPER{assem = "jal " ^ (S.name lab) ^ "\n",
+        			src = munchArgs(0,args),
+        			dst = F.calldefs,
+        			jump = NONE}))
+		
 		(* T.TEMP *)
-		| munchExp (T.TEMP t) = (printExp (T.TEMP t);t)
+		| munchExp (T.TEMP t) = (t)
 
 		(* T.ESEQ *)
 		| munchExp (T.ESEQ (stm,exp)) = (munchStm stm; munchExp exp)
 
 		(* T.NAME *)
 		| munchExp(T.NAME label) =
-        	result(fn r => emit(A.OPER{assem=("la 'd0, " ^ S.name(label)),
+        	result(fn r => emit(A.OPER{assem=("la 'd0, " ^ S.name(label) ^ "\n"),
             	src=[], dst=[r], jump=NONE}))
-
 		(* T.CONST *)
 		| munchExp (T.CONST i) = 
 			result(fn r => emit(A.OPER{assem="li 'd0, " ^ int i ^ "\n",
                 src=[], dst=[r], jump=NONE}))
-		| munchExp t = (Printtree.printtree(TextIO.stdOut,T.EXP t); ErrorMsg.impossible("bad munch exp"))	
-		(* T.CALL *)
-
-
-
+		(*| munchExp t = (Printtree.printtree(TextIO.stdOut,T.EXP t); ErrorMsg.impossible("bad munch exp"))	*)
+	and   munchArgs (i , []) = []
+	  	| munchArgs(i,a::l) = 
+	  	let
+	  		val returnTemp = ref (F.FP);
+	  		val moveArg = if (i < F.numArgs)
+	  					  then (returnTemp := List.nth(F.argregs, i);T.TEMP(!returnTemp))
+	  					  else ( munchStm(T.MOVE(T.TEMP(F.SP),T.BINOP(T.PLUS,T.TEMP(F.SP),T.CONST (F.wordsize))));T.MEM(T.TEMP(F.SP)))
+	  		val () = munchStm(T.MOVE(moveArg,a))
+	  	in
+		  	if (i < F.numArgs) 
+		  	then [!returnTemp]@munchArgs(i+1,l)
+		  	else []
+	  	end
 	in 
-		munchStm(stm); rev (!ilist)
+		munchStm(stm); 
+        (*app (fn i => TextIO.output(TextIO.stdOut,format0 i)) (rev (!ilist));*)
+        rev (!ilist)
+
 	end
 end
 

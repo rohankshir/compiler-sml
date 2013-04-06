@@ -12,10 +12,16 @@ sig type frame
 
     val tempMap: register Temp.Table.table
     val registerToString: Temp.temp -> register
+    val calldefs: Temp.temp list
     val FP : Temp.temp
     val RV : Temp.temp
     val RA : Temp.temp
+    val SP : Temp.temp
+    val ZERO : Temp.temp
+    val GP : Temp.temp
     val wordsize: int
+    val numArgs: int
+    val argregs: Temp.temp list
 
     datatype frag = PROC of {body: Tree.stm, frame: frame}
     				| STRING of Temp.label * string

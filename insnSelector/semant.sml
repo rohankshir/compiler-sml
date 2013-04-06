@@ -177,7 +177,7 @@ fun transExp (venv, tenv, level, break) =
         	| trexp (A.AssignExp {var,exp,pos} ) =							(* AssignExp *)
         		let
         			val {exp = left, ty = left_ty} = (trvar (var))
-        			val {exp = right, ty = right_ty} = (trvar (var))
+        			val {exp = right, ty = right_ty} = (trexp (exp))
         		in 
         			if (eqTypes(left_ty,right_ty))
         			then {exp = (Tr.assignExp(left,right)), ty = Types.UNIT}
