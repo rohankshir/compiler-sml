@@ -18,6 +18,7 @@ struct
   val frags = ref [] : frag list ref (* Init frag list to empty list *)
   
   structure T = Tree
+  structure A = Assem
 
   val FP = Temp.newtemp()
   val RV = Temp.newtemp()
@@ -84,7 +85,44 @@ struct
             (((#numLocals f):= !(#numLocals f)+ 1);
             InReg(Temp.newtemp())))
 
-  fun procEntryExit1 (frame, stm) = stm
+  
+  fun seq [] = T.EXP (T.CONST 0)
+      | seq [s] = s
+      | seq (h::l) = T.SEQ(h,seq l)
+
+  fun viewShift (f:frame) = 
+    let
+      fun helper (access, arg) = T.MOVE (exp access (T.TEMP FP),T.TEMP arg)
+      val access_list = formals f
+    in 
+      seq (map helper (ListPair.zip(access_list, argregs)))
+    end
+
+
+  fun procEntryExit1 (frame, stm) =
+    let
+      val inMem = [RA] @ calleesaves
+      val inRegs = map regBuilder inMem
+      fun moveTemps (dst,src) = T.MOVE (T.TEMP dst, T.TEMP src)
+      val saveTree = map moveTemps (ListPair.zip(inRegs, inMem))
+      val restoreTree = map moveTemps (ListPair.zip(inMem, inRegs))
+    in 
+      T.SEQ (viewShift(frame), seq (saveTree @ [stm] @ restoreTree))
+    end
+
+
+
+  fun procEntryExit2 (frame, body) = 
+    body @ 
+      [A.OPER{assem="",
+              src=specialregs @ calleesaves,
+              dst=[],jump=SOME[]}]
+           
+  fun procEntryExit3 (frame, body) =
+      {prolog = "PROCEDURE " ^ Symbol.name(name(frame)) ^ "\n",
+       body = body,
+       epilog = "END " ^ Symbol.name (name(frame)) ^ "\n"}
+
   fun addFrag f = frags := (f :: !frags)
   fun getResult () = !frags
 
