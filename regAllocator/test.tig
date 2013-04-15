@@ -1,0 +1,8 @@
+/* A program to solve the 8-queens problem */
+
+let
+    var N := 8
+    function test(a:int) :int = a
+ in test(N)
+end
+  
