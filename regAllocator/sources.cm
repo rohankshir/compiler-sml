@@ -25,6 +25,7 @@ env.sml
 semant.sml
 codegen.sig
 mipscodegen.sml
+makegraph.sml
 main.sml
 graph.sig
 graph.sml
