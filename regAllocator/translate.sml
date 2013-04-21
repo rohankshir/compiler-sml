@@ -340,7 +340,7 @@ struct
       let
         val bodyexp = T.MOVE (T.TEMP Frame.RV, unEx body)
         val body' = Frame.procEntryExit1(frame, bodyexp)
-        val newfrag = Frame.PROC {body = body', frame = frame} 
+        val newfrag = Frame.PROC {body = bodyexp(*body'*), frame = frame} 
       in
         Frame.addFrag(newfrag)
       end

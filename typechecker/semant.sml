@@ -34,6 +34,7 @@ fun checkInt ({exp,ty},pos) =
 
 fun checkUnit ({exp,ty},pos) = 
 			case ty of Types.UNIT => ()
+				| Types.NIL => ()
 				| Types.BOTTOM => ()
 				| _ => ErrorMsg.error pos "Expression must return no value"
 
@@ -148,7 +149,7 @@ fun transExp (venv, tenv) =
         			{exp = (), ty = actualType}
         		end
 
-        									
+        	| trexp (A.SeqExp []) = {trexp(A.NilExp)		}		
         	| trexp (A.SeqExp l) = 											(* SeqExp *)
         		let
         			fun seqHelper [(exp,pos)] = trexp exp

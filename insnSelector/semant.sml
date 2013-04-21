@@ -32,6 +32,7 @@ fun checkInt ({exp,ty},pos) =
 
 fun checkUnit ({exp,ty},pos) = 
 			case ty of Types.UNIT => ()
+				| Types.NIL => ()
 				| Types.BOTTOM => ()
 				| _ => ErrorMsg.error pos "Expression must return no value"
 
@@ -164,6 +165,8 @@ fun transExp (venv, tenv, level, break) =
         		end
 
         									
+        	| trexp (A.SeqExp []) = {exp = A.nilExp,ty = Types.NIL}
+
         	| trexp (A.SeqExp l) = 											(* SeqExp *)
         		let 
         			val tail_exp = #1(hd(rev(l)))

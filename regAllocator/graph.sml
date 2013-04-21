@@ -76,5 +76,19 @@ struct
 
   fun nodename(g,i:int) = "n" ^ Int.toString(i)
 
+  (*fun printGraph nodelist = 
+    let
+        fun printSucc node = 
+            let 
+              val nodename = nodename node
+              val successors = map nodename (succ node)
+              val result = nodename ^ ": " ^ (String.concatWith ", " successors) ^ "\n"
+            in 
+              print result
+            end
+    in
+      app printSucc nodelist
+    end*)
+
 end
 

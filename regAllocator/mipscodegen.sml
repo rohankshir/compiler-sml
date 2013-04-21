@@ -98,7 +98,7 @@ struct
                     dst=[], jump=NONE})
 
         	| munchStm(T.MOVE(T.TEMP t, T.CONST i)) =
-        		( emit(A.OPER{assem="li 'd0, 's0\n",
+        		( emit(A.OPER{assem="li 'd0, "^int i^"\n",
           			src= [],
           			dst= [t], jump=NONE}))
 
