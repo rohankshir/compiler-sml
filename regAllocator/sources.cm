@@ -32,4 +32,5 @@ graph.sml
 canon.sml
 flowgraph.sml
 assem.sml
+liveness.sml
 $/ml-yacc-lib.cm
