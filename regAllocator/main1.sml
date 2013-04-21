@@ -11,7 +11,7 @@ structure Main = struct
      let val _ = print ("emit " ^ (S.name(F.name frame)) ^ "\n")
 (*         val _ = Printtree.printtree(out,body); *)
          val stms = Canon.linearize body
-         val _ = app (fn s => Printtree.printtree(out,s)) stms; 
+         (*val _ = app (fn s => Printtree.printtree(out,s)) stms; *)
          val stms' = Canon.traceSchedule(Canon.basicBlocks stms)
         val instrs =   List.concat(map (Mips.codegen frame) stms') 
          val format0 = Assem.format(F.registerToString)
@@ -30,9 +30,28 @@ structure Main = struct
            val frags = (FindEscape.findEscape absyn; Semant.transProg absyn)
         in 
             withOpenFile (filename ^ ".s") 
-       (fn out => (app (emitproc out) frags))
+       (fn out => (map (emitproc out) frags))
        end
 
+    fun processFrag (F.PROC{body,frame}) =
+     let val _ = print ("emit " ^ (S.name(F.name frame)) ^ "\n")
+(*         val _ = Printtree.printtree(out,body); *)
+         val stms = Canon.linearize body
+         (*val _ = app (fn s => Printtree.printtree(out,s)) stms; *)
+         val stms' = Canon.traceSchedule(Canon.basicBlocks stms)
+         val instrs =   List.concat(map (Mips.codegen frame) stms')
+      in
+          SOME(Makegraph.instrs2graph instrs)
+      end
+    | processFrag (F.STRING (lab,s)) = NONE
+
+    fun getGraphs filename = 
+      let val absyn = Parse.parse filename
+           val frags = (FindEscape.findEscape absyn; Semant.transProg absyn)
+        in 
+          List.mapPartial processFrag frags
+       end
+    
 end
 
 
