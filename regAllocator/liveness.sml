@@ -11,10 +11,6 @@ sig
 
 	val show : TextIO.outstream * igraph -> unit*)
 end
-
-
-
-
 structure Liveness : LIVENESS = 
 struct 
 

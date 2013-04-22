@@ -176,10 +176,19 @@ struct
 
 		(* T.CALL *)
 		| munchExp(T.CALL(T.NAME(lab),args)) = 
-			result(fn r=> emit(A.OPER{assem = "jal " ^ (S.name lab) ^ "\n",
-        			src = munchArgs(0,args),
-        			dst = F.calldefs,
-        			jump = NONE}))
+			let
+				val numStackArgs  = length(args) - F.numArgs
+
+				val jal = emit(A.OPER{assem = "jal " ^ (S.name lab) ^ "\n",
+					        			src = munchArgs(0,args),
+					        			dst = F.calldefs,
+					        			jump = NONE})
+				val fixSP = if (numStackArgs > 0) then
+			  					munchStm(T.MOVE(T.TEMP(F.SP),T.BINOP(T.PLUS,T.TEMP(F.SP),T.CONST (F.wordsize * numStackArgs))))
+			  					else ()
+			 in
+			 F.RV
+			 end
 		
 		(* T.TEMP *)
 		| munchExp (T.TEMP t) = (t)
@@ -199,17 +208,28 @@ struct
 	
 		(**************** MUNCH EXP *******************)
 		and munchArgs (i , []) = []
-	  	| munchArgs(i,a::l) = 
+	  	| munchArgs(i,l) = 
 	  		let
-	  			val dst = if (i < F.numArgs)
-	  				then T.TEMP(List.nth(F.argregs, i))
-	  				else T.MEM(T.TEMP(F.SP))
-	  			val () = munchStm(T.MOVE(dst, a))
-	  		in
-	  			(case dst of 
-	  				T.TEMP x => x::munchArgs(i+1, l)
-	  				| _ => munchArgs(i+1, l))
-	  		end
+	  			fun helper (i,[]) = []
+	  			| helper(i,a::l) = 
+		  			let
+			  			val dst = if (i < F.numArgs)
+			  				then T.TEMP(List.nth(F.argregs, i))
+			  				else T.MEM(T.BINOP(T.PLUS,T.TEMP(F.SP),T.CONST(i*F.wordsize)))
+			  			val () = munchStm(T.MOVE(dst, a))
+			  		in
+			  			(case dst of 
+			  				T.TEMP x => x::helper(i+1, l)
+			  				| _ => helper(i+1, l))
+			  		end
+			  	val numStackArgs = length(l)-F.numArgs
+			  	val pushStack = if (numStackArgs > 0) then
+			  					munchStm(T.MOVE(T.TEMP(F.SP),T.BINOP(T.MINUS,T.TEMP(F.SP),T.CONST (F.wordsize * numStackArgs))))
+			  					else ()
+			 in
+			 	helper(i,l)
+			 end
+		  		
 
 
 	  		(*val returnTemp = ref (F.FP);
