@@ -3,7 +3,7 @@ sig
 	val instrs2graph: Assem.instr list -> Flow.flowgraph * Graph.node list
 end
 
-structure Makegraph :> MAKEGRAPH = 
+structure MakeGraph :> MAKEGRAPH = 
 struct
 
 structure A = Assem
