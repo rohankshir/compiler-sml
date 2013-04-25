@@ -109,6 +109,6 @@ newln = \n ;
 <INITIAL>	if => (Tokens.IF(yypos, yypos+2));
 <INITIAL> 	array => (Tokens.ARRAY(yypos, yypos+5));
 
-<INITIAL>    {alpha}({alpha}|{digit})* => (Tokens.ID(yytext,yypos, yypos + size yytext));
+<INITIAL>    {alpha}({alpha}|{digit}|"_")* => (Tokens.ID(yytext,yypos, yypos + size yytext));
 <INITIAL>    {digit}+ => (Tokens.INT(Option.getOpt(Int.fromString(yytext), 0), yypos, yypos + size yytext));
 .       => (ErrorMsg.error yypos ("illegal character " ^ yytext); continue());
