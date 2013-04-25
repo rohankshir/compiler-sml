@@ -57,6 +57,7 @@ newln = \n ;
 <STRING> \\{digit}{3} => ( str := !str ^ (convertAscii yytext); continue());
 <STRING> \\[\n|\t|\ |\f]+\\ => (lineNum := !lineNum + newlCounter yytext;continue());
 <STRING> \\[\n|\t|\ |\f]+[^\\] => (ErrorMsg.error yypos "unclosed form feed between string";continue());
+<STRING> \\. => (ErrorMsg.error yypos "illegal escape sequence"; continue());
 <STRING> . => (str := !str ^ yytext; continue());
 
 <INITIAL, COMMENT> "/*" => (nestLevel := !nestLevel + 1; YYBEGIN COMMENT; continue());

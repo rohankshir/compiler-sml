@@ -1,2 +1,1 @@
-var a = "string start\
-\string end"
+var a = "string start\"
