@@ -1,6 +1,6 @@
 signature COLOR = 
 sig	structure Frame:FRAME
-(*	type allocation = Frame.register Temp.Table.table
+	(*type allocation = Frame.register Temp.Table.table
 	val color: {interference: Liveness.igraph,
 				initial: allocation,
 				spillCost: Graph.node -> int,

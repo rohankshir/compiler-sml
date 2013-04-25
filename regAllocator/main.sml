@@ -41,7 +41,7 @@ structure Main = struct
          val stms' = Canon.traceSchedule(Canon.basicBlocks stms)
          val instrs =   List.concat(map (Mips.codegen frame) stms')
       in
-          SOME(Makegraph.instrs2graph instrs)
+          SOME(MakeGraph.instrs2graph instrs)
       end
     | processFrag (F.STRING (lab,s)) = NONE
 

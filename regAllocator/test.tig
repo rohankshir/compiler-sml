@@ -1,5 +1,8 @@
-let
-	var a:= 0
-in 
-	for i:=0 to 100 do (a:=a+1;())
+/* error: initializing nil expressions not constrained by record type */
+let 
+	type rectype = {name:string, id:int}
+
+	var a:= nil
+in
+	a
 end
