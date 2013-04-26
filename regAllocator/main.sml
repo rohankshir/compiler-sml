@@ -73,9 +73,6 @@ structure Main = struct
         let val absyn = Parse.parse filename
            val frags = (FindEscape.findEscape absyn; Semant.transProg absyn)
            val l = List.mapPartial processFrag frags
-           val (flowgraphList, nodeList) = (ListPair.unzip(l))
-           val () = app printGraph nodeList
-           val igraphList = map Liveness.interferenceGraph flowgraphList
            fun printHelper (flowgraph,nodelist) = 
             let
               val () = (print "\nFlowgraph:\n";printGraph nodelist)
