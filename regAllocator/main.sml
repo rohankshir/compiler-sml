@@ -45,12 +45,10 @@ structure Main = struct
       end
     | processFrag (F.STRING (lab,s)) = NONE
 
-    fun getGraphs filename = 
-      let val absyn = Parse.parse filename
-           val frags = (FindEscape.findEscape absyn; Semant.transProg absyn)
-           val l = List.mapPartial processFrag frags
-           val (flowgraph,nodelist) = hd l
-           fun printSucc node = 
+
+    fun printGraph nodeList = 
+      let 
+        fun printSucc node = 
             let 
               val nodename = Graph.nodename node
               val successors = map Graph.nodename (Graph.succ node)
@@ -58,19 +56,37 @@ structure Main = struct
             in 
               print result
             end
-          val graphString = app printSucc nodelist
+          in
+            app printSucc nodeList
+          end
+
+
+    fun getGraphs filename = 
+      let val absyn = Parse.parse filename
+           val frags = (FindEscape.findEscape absyn; Semant.transProg absyn)
+           val l = List.mapPartial processFrag frags     
         in 
-          graphString
+          app printGraph (#2 (ListPair.unzip(l)))
        end
 
       fun printLiveness filename = 
         let val absyn = Parse.parse filename
            val frags = (FindEscape.findEscape absyn; Semant.transProg absyn)
            val l = List.mapPartial processFrag frags
-           val (flowgraph,nodelist) = hd l
-           val igraph = #1 (Liveness.interferenceGraph(flowgraph))
+           val (flowgraphList, nodeList) = (ListPair.unzip(l))
+           val () = app printGraph nodeList
+           val igraphList = map Liveness.interferenceGraph flowgraphList
+           fun printHelper (flowgraph,nodelist) = 
+            let
+              val () = (print "\nFlowgraph:\n";printGraph nodelist)
+              val igraph = Liveness.interferenceGraph flowgraph
+              val () = (print "\nIGraph:\n"; Liveness.show (TextIO.stdOut,#1 igraph))
+            in
+            ()
+            end
+
         in
-          Liveness.show (TextIO.stdOut, igraph)
+          app printHelper l 
         end
     
 end

@@ -9,7 +9,7 @@ let
 		while (a<N) do
 		(
 		b := a+1;
-		c := c + b
+		c := c + b;
 		a := b*2
 		);
 		c
