@@ -338,6 +338,7 @@ fun transExp (venv, tenv, level, break) =
 		and transDec (A.VarDec{name,escape,typ=NONE,init,pos},{venv,tenv,level,break, explist}) = 
 				let 
 					val {exp,ty} = transExp(venv,tenv,level,break) init
+					val () = if ty = Types.NIL then ErrorMsg.error pos "Initializing nil expressions  not constrained by record type" else ()
 					val access = Tr.allocLocal level (!escape)
 					val explist = rev((Tr.assignExp(Tr.simpleVar(access,level),exp))::rev(explist))	
 				in 
