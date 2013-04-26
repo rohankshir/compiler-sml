@@ -41,7 +41,7 @@ structure Main = struct
          val stms' = Canon.traceSchedule(Canon.basicBlocks stms)
          val instrs =   List.concat(map (Mips.codegen frame) stms')
       in
-          SOME(Makegraph.instrs2graph instrs)
+          SOME(MakeGraph.instrs2graph instrs)
       end
     | processFrag (F.STRING (lab,s)) = NONE
 
@@ -62,7 +62,18 @@ structure Main = struct
         in 
           graphString
        end
+
+      fun printLiveness filename = 
+        let val absyn = Parse.parse filename
+           val frags = (FindEscape.findEscape absyn; Semant.transProg absyn)
+           val l = List.mapPartial processFrag frags
+           val (flowgraph,nodelist) = hd l
+           val igraph = #1 (Liveness.interferenceGraph(flowgraph))
+        in
+          Liveness.show (TextIO.stdOut, igraph)
+        end
     
 end
+
 
 

@@ -26,7 +26,7 @@ semant.sml
 codegen.sig
 mipscodegen.sml
 makegraph.sml
-main1.sml
+main.sml
 graph.sig
 graph.sml
 canon.sml
@@ -35,5 +35,5 @@ assem.sml
 liveness.sml
 color.sig
 color.sml
-reg_alloc.sml
+
 $/ml-yacc-lib.cm
