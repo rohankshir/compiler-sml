@@ -1,5 +1,20 @@
 let 
-	var a := 1
+	function test(): int = 
+	let 
+		var a := 0
+		var b := 0
+		var c := 0
+		var N := 100
 	in
-	a
+		while (a<N) do
+		(
+		b := a+1;
+		c := c + b
+		a := b*2
+		);
+		c
 	end
+
+in
+	test()
+end
