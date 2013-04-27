@@ -34,7 +34,9 @@ struct
   val argregs = List.tabulate(4,regBuilder)
   val callersaves = List.tabulate(8,regBuilder)
   val calleesaves = List.tabulate(8,regBuilder)
+  val tempregs = List.tabulate(6,regBuilder)
   val calldefs = [FP,RV,RA] @ callersaves
+  val registers = specialregs @ argregs @ callersaves @ calleesaves @ tempregs
 
   fun buildTempMap() = 
     let

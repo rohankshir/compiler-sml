@@ -1,2 +1,2 @@
 Skeleton 5
-ad"Color"jh1ad"Frame"gp1d"MipsFrame"gp1c"COLOR"
+d2f4d"List"d"Temp"d"Liveness"d"Graph"ad"Color"jh2ad"Frame"gp1d"MipsFrame"ad"Stack"jË0ˇÅgp1c"COLOR"

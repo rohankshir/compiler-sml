@@ -22,6 +22,7 @@ sig type frame
     val wordsize: int
     val numArgs: int
     val argregs: Temp.temp list
+    val registers: Temp.temp list
 
     datatype frag = PROC of {body: Tree.stm, frame: frame}
     				| STRING of Temp.label * string
