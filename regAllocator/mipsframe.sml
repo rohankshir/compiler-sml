@@ -32,17 +32,18 @@ struct
 
   fun regBuilder i = Temp.newtemp()
   val argregs = List.tabulate(4,regBuilder)
-  val callersaves = List.tabulate(8,regBuilder)
+  val callersaves = List.tabulate(10,regBuilder)
   val calleesaves = List.tabulate(8,regBuilder)
-  val tempregs = List.tabulate(6,regBuilder)
+  val randomRegs = List.tabulate(2,regBuilder)
   val calldefs = [FP,RV,RA] @ callersaves
-  val registers = specialregs @ argregs @ callersaves @ calleesaves @ tempregs
+  val machineTemps = specialregs @ argregs @ callersaves @ calleesaves @ randomRegs
+  val registers = ["$fp","$v0","$ra", "$zero","$gp", "$a0", "$a1", "$a2", "$a3","$t0" ,"$t1" ,"$t2" ,"$t3" ,"$t4" ,"$t5" ,"$t6" ,"$t7" ,"$t8" , "$t9", "$s0","$s1","$s2", "$s3", "$s4", "$s5", "$s6", "$s7" , "$at", "$v1"]
 
   fun buildTempMap() = 
     let
       fun addToMap ((temp,register), table ) = Temp.Table.enter(table,temp,register)
     in 
-      foldl addToMap  Temp.Table.empty [(FP,"fp") , (RV,"rv"), (RA,"ra")]
+      foldl addToMap  Temp.Table.empty (ListPair.zip(machineTemps,registers))
     end
 
   val tempMap = buildTempMap()
