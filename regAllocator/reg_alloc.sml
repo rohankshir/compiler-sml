@@ -16,12 +16,11 @@ struct
 	let 
 	    val (fgraph, nodes) = MakeGraph.instrs2graph instrs
 	    val (igraph, liveOut) = Liveness.interferenceGraph fgraph
-	    val initial' = Frame.tempMap
-	    val registers' = Frame.registers
+	    val () = print "finished liveness"
 	    val (allocation, temps) = Color.color {interference = igraph,
-						   initial = initial',
+						   initial = Frame.tempMap,
 						   spillCost = (fn x => 1),
-						   registers = registers}
+						   registers = Frame.registers}
 	in
 	    (instrs, allocation)
 	end
