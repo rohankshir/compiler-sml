@@ -3,7 +3,7 @@ structure Main = struct
    structure Tr = Translate
    structure F : FRAME = MipsFrame
    structure S = Symbol
-   (*structure R = RegAlloc*)
+   structure R = RegAlloc
 
  fun getsome (SOME x) = x
 
@@ -13,8 +13,13 @@ structure Main = struct
          val stms = Canon.linearize body
          (*val _ = app (fn s => Printtree.printtree(out,s)) stms; *)
          val stms' = Canon.traceSchedule(Canon.basicBlocks stms)
-        val instrs =   List.concat(map (Mips.codegen frame) stms') 
-         val format0 = Assem.format(F.registerToString)
+        val instrs =   List.concat(map (Mips.codegen frame) stms')
+        val (_,allocation) = R.alloc(instrs,frame)
+        fun regToString temp = 
+          case Temp.Table.look(allocation,temp) of 
+            SOME(reg) => reg
+          | NONE => Temp.makestring(temp)
+         val format0 = Assem.format(regToString)
       in  app (fn i => TextIO.output(out,format0 i)) instrs
      end
     | emitproc out (F.STRING (lab,s)) = TextIO.output(out,F.string(lab,s))
