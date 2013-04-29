@@ -163,7 +163,7 @@ struct
 									else 
 										if isMove andalso Set.member(useSet, temp2)
 										then mkMoveList(temp1, temp2)
-										else Graph.mk_edge{from = node1, to = node2}
+										else (Graph.mk_edge{from = node1, to = node2})
 								end
 							in 
 								app mkEdge (Set.listItems(liveOutSet))

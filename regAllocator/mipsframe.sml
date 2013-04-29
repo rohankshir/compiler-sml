@@ -118,7 +118,7 @@ struct
   fun procEntryExit2 (frame, body) = 
     body @ 
       [A.OPER{assem="",
-              src=specialregs @ calleesaves,
+              src=[ZERO,RA,SP] @ calleesaves,
               dst=[],jump=SOME[]}]
            
   fun procEntryExit3 (frame, body) =

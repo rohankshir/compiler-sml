@@ -1,85 +1,87 @@
 MOVE(
- TEMP t101,
+ TEMP t4220,
  CALL(
-  NAME L34,
-   TEMP t100))
-L38:
-move 'd0, 's0
-jal L34
-move 'd0, 's0
-j L37
-L37:
+  NAME L381,
+   TEMP t4219,
+   CONST 5))
+L385:
+move $a1, $fp
+li $a2, 5
+jal L381
+move $v0, $v0
+j L384
+L384:
 MOVE(
- TEMP t101,
+ TEMP t4220,
  ESEQ(
   MOVE(
-   TEMP t230,
+   TEMP t4687,
    CONST 0),
   ESEQ(
    MOVE(
-    TEMP t231,
+    TEMP t4688,
     CONST 0),
    ESEQ(
     MOVE(
-     TEMP t232,
+     TEMP t4689,
      CONST 0),
     ESEQ(
      MOVE(
-      TEMP t233,
+      TEMP t4690,
       CONST 100),
      ESEQ(
       SEQ(
-       LABEL L35,
+       LABEL L382,
        SEQ(
         CJUMP(LT,
-         TEMP t230,
-         TEMP t233,
-         L36,L33),
+         TEMP t4687,
+         TEMP t4690,
+         L383,L380),
         SEQ(
-         LABEL L36,
+         LABEL L383,
          SEQ(
           EXP(
            ESEQ(
             MOVE(
-             TEMP t231,
+             TEMP t4688,
              BINOP(PLUS,
-              TEMP t230,
+              TEMP t4687,
               CONST 1)),
             ESEQ(
              MOVE(
-              TEMP t232,
+              TEMP t4689,
               BINOP(PLUS,
-               TEMP t232,
-               TEMP t231)),
+               TEMP t4689,
+               TEMP t4688)),
              ESEQ(
               MOVE(
-               TEMP t230,
+               TEMP t4687,
                BINOP(MUL,
-                TEMP t231,
+                TEMP t4688,
                 CONST 2)),
               CONST 0)))),
           SEQ(
            JUMP(
-            NAME L35),
-           LABEL L33))))),
-      TEMP t232))))))
-L40:
-li 'd0, 0
-li 'd0, 0
-li 'd0, 0
-li 'd0, 100
-L35:
-blt 's0, 's1, L36
-L33:
-move 'd0, 's0
-j L39
-L36:
-addi 'd0, 's0, 1
-move 'd0, 's0
-add 'd0, 's0, 's1
-move 'd0, 's0
-li 'd0, 2
-mult 'd0, 's0, 's1
-move 'd0, 's0
-j L35
-L39:
+            NAME L382),
+           LABEL L380))))),
+      TEMP t4689))))))
+L387:
+li $a0, 0
+li $a3, 0
+li $a2, 0
+li $a1, 100
+L382:
+blt $a0, $a1, L383
+L380:
+move $v0, $a2
+j L386
+L383:
+addi $a0, $a0, 1
+move $a3, $a0
+add $a0, $a2, $a3
+move $a2, $a0
+li $a0, 2
+mult $a0, $a3, $a0
+move $a0, $a0
+j L382
+L386:

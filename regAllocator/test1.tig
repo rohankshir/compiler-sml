@@ -1,5 +1,5 @@
 let 
-	function test(): int = 
+	function test(m:int): int = 
 	let 
 		var a := 0
 		var b := 0
@@ -16,5 +16,5 @@ let
 	end
 
 in
-	test()
+	test(5)
 end
