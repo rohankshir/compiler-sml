@@ -9,11 +9,12 @@ structure Main = struct
 
    fun emitproc out (F.PROC{body,frame}) =
      let val _ = print ("emit " ^ (S.name(F.name frame)) ^ "\n")
-         val _ = Printtree.printtree(out,body); 
+         (*val _ = Printtree.printtree(out,body); *)
          val stms = Canon.linearize body
          (*val _ = app (fn s => Printtree.printtree(out,s)) stms; *)
          val stms' = Canon.traceSchedule(Canon.basicBlocks stms)
-        val instrs =   List.concat(map (Mips.codegen frame) stms')
+        val instrs =   F.procEntryExit2(frame,List.concat(map (Mips.codegen frame) stms'))
+        val {prolog, body, epilog} = F.procEntryExit3(frame,instrs)
         val (_,allocation) = R.alloc(instrs,frame)
         fun regToString temp = 
           case Temp.Table.look(allocation,temp) of 

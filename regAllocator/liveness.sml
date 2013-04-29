@@ -97,7 +97,7 @@ struct
 					Set.union(tempSet,def_and_use)
 				end
 			val allTemps = Set.listItems(foldl getTemps Set.empty nodes)
-			val () = (print "All temps: \n"; printSet (Set.addList(Set.empty,allTemps)))
+			(*val () = (print "All temps: \n"; printSet (Set.addList(Set.empty,allTemps)))*)
 			val graph = Graph.newGraph()
 
 			fun initializeGraph(t,(node_map,temp_map)) = 
@@ -107,7 +107,7 @@ struct
 					val exists = case Graph.Table.look(node_map',node) of 
 						SOME(t) => "exists" 
 					|	NONE => "does not exist"
-					val () = print ((Graph.nodename node) ^ ": " ^(Temp.makestring t) ^ " =>" ^ exists ^ "\n")
+					(*val () = print ((Graph.nodename node) ^ ": " ^(Temp.makestring t) ^ " =>" ^ exists ^ "\n")*)
 				in
 				(node_map',temp_map')
 				end
@@ -131,7 +131,7 @@ struct
 					val useSet = Set.addList(Set.empty, getOpt(Graph.Table.look(use,node), nil))
 					val liveOutSet = getOpt(Graph.Table.look(liveOutT', node), Set.empty)
 					val isMove = getOpt(Graph.Table.look(ismove, node), false)
-					val () = (print ("Node name: " ^ (Graph.nodename node) ^ ": \nUse Set:\n"); printSet useSet; print "live out set:\n";printSet liveOutSet)
+					(*val () = (print ("Node name: " ^ (Graph.nodename node) ^ ": \nUse Set:\n"); printSet useSet; print "live out set:\n";printSet liveOutSet)*)
 
 					fun nodesAreAdj (node1, node2) = 
 						let 
@@ -147,10 +147,10 @@ struct
 								let
 									val node1 = tnode temp1
 									val node2 = tnode temp2
-									val () = print ("\nTemp 1: " ^ (Temp.makestring temp1) ^ " Node 1: " ^ (Graph.nodename node1) ^ 
+									(*val () = print ("\nTemp 1: " ^ (Temp.makestring temp1) ^ " Node 1: " ^ (Graph.nodename node1) ^ 
 										"\n")
 									val () = print ("\nTemp 2: " ^ (Temp.makestring temp2) ^ " Node 2: " ^ (Graph.nodename node2) ^ 
-										"\n")
+										"\n")*)
 
 									fun mkMoveList (temp1, temp2) = 
 										if (isMove andalso Set.member(useSet, temp2))

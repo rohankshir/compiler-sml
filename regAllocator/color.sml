@@ -37,7 +37,7 @@ struct
 			
 			val nodes = Graph.nodes graph
 			val allTemps = map gtemp nodes
-			val K = length(Frame.registers)
+			val K = length(Frame.colorable)
 			(* Currently all the colors are just string representation of numbers from 1 to K*)
 			val colorSet = StringSet.addList(StringSet.empty,registers)
 			fun nodesAreAdj (node1, node2) = 

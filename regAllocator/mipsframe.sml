@@ -38,6 +38,7 @@ struct
   val calldefs = [FP,RV,RA] @ callersaves
   val machineTemps = specialregs @ argregs @ callersaves @ calleesaves @ randomRegs
   val registers = ["$fp","$v0","$ra", "$zero","$gp", "$a0", "$a1", "$a2", "$a3","$t0" ,"$t1" ,"$t2" ,"$t3" ,"$t4" ,"$t5" ,"$t6" ,"$t7" ,"$t8" , "$t9", "$s0","$s1","$s2", "$s3", "$s4", "$s5", "$s6", "$s7" , "$at", "$v1"]
+  val colorable = ["$t0" ,"$t1" ,"$t2" ,"$t3" ,"$t4" ,"$t5" ,"$t6" ,"$t7" ,"$t8" , "$t9", "$s0","$s1","$s2", "$s3", "$s4", "$s5", "$s6", "$s7"]
 
   fun buildTempMap() = 
     let
@@ -53,8 +54,6 @@ struct
       SOME(register) => register
     | NONE => Temp.makestring(temp)
 
-
-  fun string (label,s) = Symbol.name (label) ^ ":   " ^ s
 
   fun exp (InFrame i) (e) = 
       T.MEM(T.BINOP(T.PLUS, e,T.CONST(i)))
@@ -105,12 +104,23 @@ struct
   fun procEntryExit1 (frame, stm) =
     let
       val inMem = [RA] @ calleesaves
-      val inRegs = map regBuilder inMem
-      fun moveTemps (dst,src) = T.MOVE (T.TEMP dst, T.TEMP src)
-      val saveTree = map moveTemps (ListPair.zip(inRegs, inMem))
-      val restoreTree = map moveTemps (ListPair.zip(inMem, inRegs))
+      fun moveTempsToMem (src, (accessList,stmList)) = 
+        let
+          val access = allocLocal frame true
+          val stm = case access of 
+            InFrame(i) => T.MOVE (T.MEM(T.BINOP(T.PLUS,T.TEMP(SP),T.CONST i)), T.TEMP src)
+          | _ => (ErrorMsg.error 0 "not possible yo"; T.EXP(T.CONST 9999))
+        in
+          (access::accessList,T.SEQ(stmList,stm))
+        end
+        
+      val (accessList,saveTree) = foldl moveTempsToMem (nil,T.MOVE(T.TEMP(SP),T.BINOP(T.MINUS,T.TEMP(SP),T.CONST (wordsize * length(inMem))))) inMem
+
+      fun loadTempsFromMem(InFrame(i),dst) = T.MOVE (T.TEMP dst, T.MEM(T.BINOP(T.PLUS,T.TEMP(SP),T.CONST i)))
+        | loadTempsFromMem(_,dst) = (ErrorMsg.error 0 "not possible yo"; T.EXP(T.CONST 9999))
+      val restoreTree = map loadTempsFromMem (ListPair.zip(rev accessList,inMem))
     in 
-      T.SEQ (viewShift(frame), seq (saveTree @ [stm] @ restoreTree))
+      T.SEQ (viewShift(frame), seq ( [saveTree, stm] @ restoreTree))
     end
 
 
@@ -136,6 +146,7 @@ struct
 
   fun clearFrags () = (frags := [])
  
+  fun string (label, s) = (Symbol.name label) ^ ": .word "^(Int.toString(size(s))) ^ " .ascii \"" ^ s ^ "\"\n"
 
 
 

@@ -23,7 +23,9 @@ sig type frame
     val numArgs: int
     val argregs: Temp.temp list
     val registers: register list
+    val colorable: register list
     val machineTemps: Temp.temp list
+    val string: Tree.label * string -> string
 
 
     datatype frag = PROC of {body: Tree.stm, frame: frame}
@@ -37,6 +39,5 @@ sig type frame
     val getResult : unit -> frag list
     val printFragList : frag list -> unit
     val clearFrags: unit -> unit
-    val string: Temp.label * string -> string
 
 end
