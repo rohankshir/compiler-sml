@@ -433,7 +433,7 @@ fun transProg ast =
 	let 
 		val () = Tr.clearFrags()
 		val startLevel = Tr.newLevel{parent = Translate.outermost, name = Temp.namedlabel("tig_main"), formals=[]}
-		val {exp=result,ty=ty} = transExp (E.base_venv,E.base_tenv, startLevel, Temp.namedlabel("tig_main")) ast
+		val {exp=result,ty=ty} = transExp (E.base_venv,E.base_tenv, startLevel, Temp.newlabel()) ast
 		val () = Tr.procEntryExit {level = startLevel, body = result}
 		val frags = Tr.getResult()
 	in 

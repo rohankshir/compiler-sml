@@ -37,7 +37,7 @@ struct
   val randomRegs = List.tabulate(2,regBuilder)
   val calldefs = [FP,RV,RA] @ callersaves
   val machineTemps = specialregs @ argregs @ callersaves @ calleesaves @ randomRegs
-  val registers = ["$fp","$v0","$ra", "$zero","$gp", "$a0", "$a1", "$a2", "$a3","$t0" ,"$t1" ,"$t2" ,"$t3" ,"$t4" ,"$t5" ,"$t6" ,"$t7" ,"$t8" , "$t9", "$s0","$s1","$s2", "$s3", "$s4", "$s5", "$s6", "$s7" , "$at", "$v1"]
+  val registers = ["$fp","$v0","$ra", "$sp","$zero","$gp", "$a0", "$a1", "$a2", "$a3","$t0" ,"$t1" ,"$t2" ,"$t3" ,"$t4" ,"$t5" ,"$t6" ,"$t7" ,"$t8" , "$t9", "$s0","$s1","$s2", "$s3", "$s4", "$s5", "$s6", "$s7" , "$at", "$v1"]
   val colorable = ["$t0" ,"$t1" ,"$t2" ,"$t3" ,"$t4" ,"$t5" ,"$t6" ,"$t7" ,"$t8" , "$t9", "$s0","$s1","$s2", "$s3", "$s4", "$s5", "$s6", "$s7"]
 
   fun buildTempMap() = 
@@ -63,7 +63,7 @@ struct
 
   fun allocFormal (esc, (accs,frameOffset)) =
           (* if formal escapes, add InFrame to access list and push frameOffset down *)
-          (case esc of true => (InFrame(frameOffset - wordsize)::accs, frameOffset - wordsize)
+          (case esc of true => (InFrame(frameOffset)::accs, frameOffset - wordsize)
           (* otherwise, add InReg to access list and frameOffset stays same *)
                 | false => (InReg(Temp.newtemp())::accs, frameOffset))
 
@@ -83,9 +83,7 @@ struct
             (((#numLocals f):= !(#numLocals f)+ 1);
             ((#frameOffset f) := !(#frameOffset f) - wordsize);
             InFrame(!(#frameOffset f)))
-      | false =>
-            (((#numLocals f):= !(#numLocals f)+ 1);
-            InReg(Temp.newtemp())))
+      | false => InReg(Temp.newtemp()))
 
   
   fun seq [] = T.EXP (T.CONST 0)
@@ -108,19 +106,21 @@ struct
         let
           val access = allocLocal frame true
           val stm = case access of 
-            InFrame(i) => T.MOVE (T.MEM(T.BINOP(T.PLUS,T.TEMP(SP),T.CONST i)), T.TEMP src)
+            InFrame(i) => T.MOVE (T.MEM(T.BINOP(T.PLUS,T.TEMP(FP),T.CONST i)), T.TEMP src)
           | _ => (ErrorMsg.error 0 "not possible yo"; T.EXP(T.CONST 9999))
         in
-          (access::accessList,T.SEQ(stmList,stm))
+          (access::accessList,stmList @ [stm])
         end
         
-      val (accessList,saveTree) = foldl moveTempsToMem (nil,T.MOVE(T.TEMP(SP),T.BINOP(T.MINUS,T.TEMP(SP),T.CONST (wordsize * length(inMem))))) inMem
+      val (accessList,saveTree) = foldl moveTempsToMem (nil,nil) inMem
 
-      fun loadTempsFromMem(InFrame(i),dst) = T.MOVE (T.TEMP dst, T.MEM(T.BINOP(T.PLUS,T.TEMP(SP),T.CONST i)))
+      fun loadTempsFromMem(InFrame(i),dst) = T.MOVE (T.TEMP dst, T.MEM(T.BINOP(T.PLUS,T.TEMP(FP),T.CONST i)))
         | loadTempsFromMem(_,dst) = (ErrorMsg.error 0 "not possible yo"; T.EXP(T.CONST 9999))
       val restoreTree = map loadTempsFromMem (ListPair.zip(rev accessList,inMem))
+     (* val growStack = T.MOVE(T.TEMP(F.SP),T.BINOP(T.MINUS,T.TEMP(F.SP),T.CONST (F.wordsize * #numLocals frame)))
+      val resetStack = T.MOVE(T.TEMP(F.SP),T.BINOP(T.PLUS,T.TEMP(F.SP),T.CONST (F.wordsize * #numLocals frame)))*)
     in 
-      T.SEQ (viewShift(frame), seq ( [saveTree, stm] @ restoreTree))
+      seq ([ T.LABEL(name frame),viewShift(frame)] @ saveTree @  [stm] @ restoreTree)
     end
 
 

@@ -1,42 +1,40 @@
-L460:
-sw $a1, ~4($fp)
-addi $s0, $zero, ~36
-move $zero, $s0
-sw $ra, ~8($zero)
-sw $s1, ~12($zero)
-sw $s2, ~16($zero)
-sw $s3, ~20($zero)
-sw $s4, ~24($zero)
-sw $s5, ~28($zero)
-sw $s6, ~32($zero)
-sw $s7, ~36($zero)
-sw $at, ~40($zero)
-la $s0, L457
+tig_main:
+sw $a0, 0($fp)
+sw $ra, ~8($fp)
+sw $s0, ~12($fp)
+sw $s1, ~16($fp)
+sw $s2, ~20($fp)
+sw $s3, ~24($fp)
+sw $s4, ~28($fp)
+sw $s5, ~32($fp)
+sw $s6, ~36($fp)
+sw $s7, ~40($fp)
+la $s0, L489
 move $s1, $s0
-la $s0, L458
+la $s0, L490
 move $s0, $s0
 li $s0, 3
 addi $s0, $s0, 4
 move $v0, $s1
-lw $s0, ~8($zero)
+lw $s0, ~8($fp)
 move $ra, $s0
-lw $s0, ~12($zero)
-move $s1, $s0
-lw $s0, ~16($zero)
-move $s2, $s0
-lw $s0, ~20($zero)
-move $s3, $s0
-lw $s0, ~24($zero)
-move $s4, $s0
-lw $s0, ~28($zero)
-move $s5, $s0
-lw $s0, ~32($zero)
-move $s6, $s0
-lw $s0, ~36($zero)
-move $s7, $s0
-lw $s0, ~40($zero)
-move $at, $s0
-j L459
-L459:
-L458: .word 5 .ascii "hello"
-L457: .word 2 .ascii "hi"
+lw $s0, ~12($fp)
+move $s0, $s0
+lw $s1, ~16($fp)
+move $s1, $s1
+lw $s2, ~20($fp)
+move $s2, $s2
+lw $s3, ~24($fp)
+move $s3, $s3
+lw $s4, ~28($fp)
+move $s4, $s4
+lw $s5, ~32($fp)
+move $s5, $s5
+lw $s6, ~36($fp)
+move $s6, $s6
+lw $s7, ~40($fp)
+move $s7, $s7
+j L491
+L491:
+L490: .word 5 .ascii "hello"
+L489: .word 2 .ascii "hi"
